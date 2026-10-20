@@ -6,6 +6,7 @@ var ui: Control
 var _pages := {}
 var _modifiers: Array = []
 var _hero := "ranger"
+var _map := "forest"
 var _rig: CameraRig
 
 
@@ -159,6 +160,23 @@ func _new_run_page() -> Control:
 		# Buttons do not size to custom children: follow the content height.
 		hv.resized.connect(func(): card.custom_minimum_size.y = hv.size.y + 16)
 		card.custom_minimum_size.y = 150
+	var maps := Profile.available_maps()
+	if maps.size() > 1:
+		v.add_child(UITheme.label(tr("MENU_CHOOSE_MAP"), "Header"))
+		var row := HBoxContainer.new()
+		var mgroup := ButtonGroup.new()
+		for mid in maps:
+			var mb := UITheme.button(tr(DataDB.map(mid).name_key), false, Vector2(250, 52))
+			mb.toggle_mode = true
+			mb.button_group = mgroup
+			mb.button_pressed = mid == _map
+			mb.toggled.connect(func(on):
+				if on:
+					_map = mid)
+			row.add_child(mb)
+		v.add_child(row)
+	elif not maps.has(_map):
+		_map = "forest"
 	if Profile.challenges_available():
 		v.add_child(UITheme.label(tr("MENU_CHALLENGES"), "Header"))
 		for mid in DataDB.modifiers():
@@ -179,7 +197,7 @@ func _new_run_page() -> Control:
 	start.pressed.connect(func():
 		Profile.data.modifiers = _modifiers.duplicate()
 		Profile.clear_run()
-		Profile.new_run(_modifiers, _hero)
+		Profile.new_run(_modifiers, _hero, _map)
 		get_tree().change_scene_to_file("res://scenes/game.tscn"))
 	v.add_child(start)
 	var back := UITheme.button(tr("BACK"))

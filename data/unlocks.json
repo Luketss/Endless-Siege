@@ -3,5 +3,6 @@
 	"tar":      { "cost": 25, "kind": "structure", "name_key": "S_TAR" },
 	"legendary_pool": { "cost": 40, "kind": "pool", "name_key": "UNL_LEGENDARY", "upgrades": ["meteor_volley", "overcharge", "eternal_winter", "trap_engineer"] },
 	"challenges": { "cost": 15, "kind": "feature", "name_key": "UNL_CHALLENGES" },
-	"warrior":  { "cost": 30, "kind": "hero", "name_key": "H_WARRIOR" }
+	"warrior":  { "cost": 30, "kind": "hero", "name_key": "H_WARRIOR" },
+	"frost_map": { "cost": 20, "kind": "map", "map": "frost", "name_key": "MAP_FROST" }
 }

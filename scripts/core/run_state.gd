@@ -28,10 +28,11 @@ var hero_level: int = 1
 var hero_xp: float = 0.0
 
 
-static func create(p_seed: int, p_hero: String, p_modifiers: Array, p_unlocks: Array) -> RunState:
+static func create(p_seed: int, p_hero: String, p_modifiers: Array, p_unlocks: Array, p_map: String = "forest") -> RunState:
 	var r := RunState.new()
 	r.run_seed = p_seed
 	r.hero_id = p_hero
+	r.map_id = p_map
 	r.modifiers = p_modifiers.duplicate()
 	r.unlocks = p_unlocks.duplicate()
 	r.gold = int(DataDB.balance().start_gold)

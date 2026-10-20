@@ -269,3 +269,14 @@ func test_warrior_needs_unlock() -> void:
 	check(DataDB.unlocks().has("warrior"), "sold in the sanctuary")
 	var run := RunState.create(4, "warrior", [], [])
 	check_eq(RunFlow.make_sim(run).hero.def.name_key, "H_WARRIOR")
+
+
+func test_frost_map_plays() -> void:
+	var run := RunState.create(3, "ranger", [], [], "frost")
+	var copy := RunState.from_dict(JSON.parse_string(JSON.stringify(run.to_dict())))
+	check_eq(copy.map_id, "frost", "map survives save/load")
+	var node := RunFlow.enter(run, "0-0")
+	var cleared := Autopilot.play_combat(run, node, Autopilot.new(3))
+	check_eq(cleared, 3, "first fight on the frost map is winnable")
+	check(not run.structures.is_empty())
+	check(DataDB.unlocks().frost_map.map == "frost", "unlockable")

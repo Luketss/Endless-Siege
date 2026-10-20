@@ -17,6 +17,7 @@ var obstacles: Array[Dictionary] = []
 ## [{"rect": Rect2, "tall": bool}]
 var walls: Array[Dictionary] = []
 ## [{"rect": Rect2, "height": float, "ramp": String}]
+var biome := ""  # visual theme key in data/visuals.json "biomes"
 var plateaus: Array[Dictionary] = []
 
 
@@ -24,6 +25,7 @@ static func from_dict(d: Dictionary) -> MapDef:
 	var m := MapDef.new()
 	m.id = d.get("id", "")
 	m.name_key = d.get("name_key", "")
+	m.biome = d.get("biome", "")
 	var b: Array = d.bounds
 	m.bounds = Rect2(b[0], b[1], b[2], b[3])
 	var pts := PackedVector2Array()

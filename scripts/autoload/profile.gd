@@ -73,11 +73,23 @@ func available_heroes() -> Array:
 	return out
 
 
-func new_run(modifiers: Array, hero_id: String = "ranger") -> RunState:
+## Battlefields: the forest, plus maps unlocked in the Sanctuary.
+func available_maps() -> Array:
+	var out := ["forest"]
+	for id in DataDB.unlocks():
+		var u: Dictionary = DataDB.unlocks()[id]
+		if u.kind == "map" and is_unlocked(id):
+			out.append(u.map)
+	return out
+
+
+func new_run(modifiers: Array, hero_id: String = "ranger", map_id: String = "forest") -> RunState:
 	var seed_value := int(Time.get_unix_time_from_system()) ^ randi()
 	if not available_heroes().has(hero_id):
 		hero_id = "ranger"
-	active_run = RunState.create(seed_value, hero_id, modifiers, data.unlocks)
+	if not available_maps().has(map_id):
+		map_id = "forest"
+	active_run = RunState.create(seed_value, hero_id, modifiers, data.unlocks, map_id)
 	data.stats.runs = int(data.stats.runs) + 1
 	save()
 	save_run(active_run)

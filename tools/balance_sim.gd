@@ -2,7 +2,8 @@ extends SceneTree
 ## Balance report: plays whole journeys with the scripted Autopilot (no hero actions).
 ##   godot --headless --path . --script res://tools/balance_sim.gd
 ## Env: SIM_RUNS (default 12), SIM_MODS (comma separated challenge ids),
-##      SIM_LOG (path: also write runs.jsonl records, readable by tools/run_report.py).
+##      SIM_LOG (path: also write runs.jsonl records, readable by tools/run_report.py),
+##      SIM_MAP (map id, default forest).
 ## The autopilot does not use the hero, so it is a "floor": a human should do better.
 
 
@@ -10,6 +11,7 @@ func _initialize() -> void:
 	var n := int(OS.get_environment("SIM_RUNS")) if OS.get_environment("SIM_RUNS") != "" else 12
 	var mods_env := OS.get_environment("SIM_MODS")
 	var mods: Array = [] if mods_env == "" else Array(mods_env.split(","))
+	var map_id := OS.get_environment("SIM_MAP") if OS.get_environment("SIM_MAP") != "" else "forest"
 	var wins := 0
 	var depth_sum := 0
 	var deaths := {}
@@ -17,7 +19,7 @@ func _initialize() -> void:
 	var gold_left := []
 	var t0 := Time.get_ticks_msec()
 	for i in n:
-		var run := Autopilot.play_journey(1000 + i, ["banner", "tar", "legendary_pool"], mods)
+		var run := Autopilot.play_journey(1000 + i, ["banner", "tar", "legendary_pool"], mods, map_id)
 		if OS.get_environment("SIM_LOG") != "":
 			RunLog.append(run, OS.get_environment("SIM_LOG"))
 		if run.victory:

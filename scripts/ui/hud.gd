@@ -90,8 +90,13 @@ func _build() -> void:
 	tc.add_child(_title)
 	_wave_label = UITheme.label("", "", HORIZONTAL_ALIGNMENT_CENTER)
 	tc.add_child(_wave_label)
+	for l: Label in [_title, _wave_label]:
+		l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		l.add_theme_constant_override("outline_size", 6)
 	_status = UITheme.label("", "", HORIZONTAL_ALIGNMENT_CENTER)
 	_status.add_theme_color_override("font_color", UITheme.GOLD)
+	_status.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_status.add_theme_constant_override("outline_size", 6)
 	tc.add_child(_status)
 	_boss_box = VBoxContainer.new()
 	_boss_box.visible = false

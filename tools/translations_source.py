@@ -38,7 +38,9 @@ S = {
  "MENU_HERO_LOCKED": ("unlock in the Sanctuary", "desbloqueie no Santuário"),
  "AB_SWING": ("Swing", "Golpe"), "AB_SLAM": ("Slam", "Impacto"), "AB_CHARGE": ("Charge", "Investida"),
  "AB_ATTACK": ("Shoot", "Atirar"), "AB_RAIN": ("Rain", "Chuva"), "AB_BLAST": ("Blast", "Rajada"), "AB_DODGE": ("Dodge", "Esquiva"),
- "MAP_FOREST": ("Corrupted Forest", "Floresta Corrompida"),
+ "MAP_FOREST": ("Corrupted Forest", "Floresta Corrompida"), "MAP_FROST": ("Frozen Pass", "Passo Congelado"),
+ "MENU_CHOOSE_MAP": ("Battlefield", "Campo de batalha"),
+ "UNL_FROST_MAP_DESC": ("A second battlefield: a long, winding mountain road with high ground on both flanks.", "Um segundo campo de batalha: uma estrada de montanha longa e sinuosa, com terreno alto nos dois flancos."),
  # ---- structures
  "S_ARROW": ("Arrow Tower", "Torre de Flechas"), "S_ARROW_DESC": ("Fast single-target shots. Hits flyers.", "Disparos rápidos em alvo único. Atinge voadores."),
  "S_CANNON": ("Cannon", "Canhão"), "S_CANNON_DESC": ("Slow area damage against groups. Cannot hit flyers.", "Dano em área lento contra grupos. Não atinge voadores."),

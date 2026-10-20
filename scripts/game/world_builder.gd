@@ -4,10 +4,35 @@ extends RefCounted
 ## Collision layer 1 = world geometry (ground, plateaus, ramps, obstacles, borders).
 
 const WORLD_LAYER := 1
+## Colours and props per biome; maps name their biome and data/visuals.json "biomes"
+## overrides any of these keys.
+const DEFAULT_THEME := {
+	"sky_top": "2c2440", "sky_horizon": "a58aa0", "ground_horizon": "4a3f52", "ground_bottom": "1a1520",
+	"fog": "7a6f8a", "sun": "ffe2c2", "sun_energy": 1.25,
+	"grass": "", "grass_dark": "", "patch": "", "dirt": "", "dirt_edge": "", "plateau_top": "4d5a45",
+	"tree_tint": "", "decor_tint": "",
+}
+
+static var _t: Dictionary = DEFAULT_THEME
+
+
+static func theme_for(biome: String) -> Dictionary:
+	var t := DEFAULT_THEME.duplicate()
+	var over: Dictionary = DataDB.visuals().get("biomes", {}).get(biome, {})
+	for k in over:
+		t[k] = over[k]
+	return t
+
+
+## Theme colour, or `fallback` when the biome leaves it empty.
+static func _c(key: String, fallback: Color = Color.WHITE) -> Color:
+	var v = _t.get(key, "")
+	return Color(v) if v is String and v != "" else fallback
 
 
 static func build(root: Node3D, map: MapDef, shadows: bool = true) -> Dictionary:
 	var refs := {}
+	_t = theme_for(map.biome)
 	_environment(root, shadows)
 	_ground(root, map)
 	_road(root, map)
@@ -37,10 +62,10 @@ static func _environment(root: Node3D, shadows: bool) -> void:
 	env.background_mode = Environment.BG_SKY
 	var sky := Sky.new()
 	var mat := ProceduralSkyMaterial.new()
-	mat.sky_top_color = Color("2c2440")
-	mat.sky_horizon_color = Color("a58aa0")
-	mat.ground_horizon_color = Color("4a3f52")
-	mat.ground_bottom_color = Color("1a1520")
+	mat.sky_top_color = _c("sky_top")
+	mat.sky_horizon_color = _c("sky_horizon")
+	mat.ground_horizon_color = _c("ground_horizon")
+	mat.ground_bottom_color = _c("ground_bottom")
 	mat.sun_angle_max = 30.0
 	sky.sky_material = mat
 	env.sky = sky
@@ -52,7 +77,7 @@ static func _environment(root: Node3D, shadows: bool) -> void:
 	env.glow_intensity = 0.6
 	env.glow_bloom = 0.08
 	env.fog_enabled = true
-	env.fog_light_color = Color("7a6f8a")
+	env.fog_light_color = _c("fog")
 	env.fog_density = 0.0035
 	env.fog_aerial_perspective = 0.3
 	env.ssao_enabled = shadows
@@ -61,8 +86,8 @@ static func _environment(root: Node3D, shadows: bool) -> void:
 	root.add_child(we)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-52, -35, 0)
-	sun.light_color = Color("ffe2c2")
-	sun.light_energy = 1.25
+	sun.light_color = _c("sun")
+	sun.light_energy = float(_t.sun_energy)
 	sun.shadow_enabled = shadows
 	sun.shadow_bias = 0.3
 	sun.shadow_normal_bias = 3.0
@@ -101,27 +126,27 @@ static func _static_cylinder(root: Node3D, center: Vector3, radius: float, heigh
 static func _ground(root: Node3D, map: MapDef) -> void:
 	var size := map.bounds.size + Vector2(60, 60)
 	var center := map.bounds.get_center()
-	Art.part(root, Art.box(Vector3(size.x, 1.0, size.y)), Art.mat(Art.PALETTE.grass), Vector3(center.x, -0.5, center.y), Vector3.ZERO, Vector3.ONE, false)
+	Art.part(root, Art.box(Vector3(size.x, 1.0, size.y)), Art.mat(_c("grass", Art.PALETTE.grass)), Vector3(center.x, -0.5, center.y), Vector3.ZERO, Vector3.ONE, false)
 	_static_box(root, Vector3(center.x, -0.5, center.y), Vector3(size.x, 1.0, size.y))
 	# Darker play area outline so the buildable zone reads clearly.
-	Art.part(root, Art.box(Vector3(map.bounds.size.x + 0.6, 0.02, map.bounds.size.y + 0.6)), Art.mat(Art.PALETTE.grass_dark),
+	Art.part(root, Art.box(Vector3(map.bounds.size.x + 0.6, 0.02, map.bounds.size.y + 0.6)), Art.mat(_c("grass_dark", Art.PALETTE.grass_dark)),
 		Vector3(center.x, 0.005, center.y), Vector3.ZERO, Vector3.ONE, false)
-	Art.part(root, Art.box(Vector3(map.bounds.size.x, 0.02, map.bounds.size.y)), Art.mat(Art.PALETTE.grass),
+	Art.part(root, Art.box(Vector3(map.bounds.size.x, 0.02, map.bounds.size.y)), Art.mat(_c("grass", Art.PALETTE.grass)),
 		Vector3(center.x, 0.01, center.y), Vector3.ZERO, Vector3.ONE, false)
 	# Corruption patches spreading from the portal.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
 	for i in 18:
 		var p := Vector2(rng.randf_range(map.bounds.position.x, map.bounds.end.x), rng.randf_range(map.bounds.position.y, map.bounds.position.y + 26))
-		Art.part(root, Art.cyl(1.0, 1.0, 0.02, 12), Art.mat(Art.PALETTE.corruption.lerp(Art.PALETTE.grass, 0.45).darkened(0.15)), Vector3(p.x, 0.012, p.y),
+		Art.part(root, Art.cyl(1.0, 1.0, 0.02, 12), Art.mat(_c("patch", Art.PALETTE.corruption.lerp(Art.PALETTE.grass, 0.45).darkened(0.15))), Vector3(p.x, 0.012, p.y),
 			Vector3.ZERO, Vector3(rng.randf_range(1.5, 4.0), 1, rng.randf_range(1.5, 4.0)), false)
 
 
 static func _road(root: Node3D, map: MapDef) -> void:
 	var pts := map.path.points
 	var w := map.path_width
-	var dirt := Art.mat(Art.PALETTE.dirt)
-	var edge := Art.mat(Art.PALETTE.dirt_edge)
+	var dirt := Art.mat(_c("dirt", Art.PALETTE.dirt))
+	var edge := Art.mat(_c("dirt_edge", Art.PALETTE.dirt_edge))
 	for i in range(pts.size() - 1):
 		var a := pts[i]
 		var b := pts[i + 1]
@@ -152,7 +177,7 @@ static func _plateau(root: Node3D, pl: Dictionary) -> void:
 	var h := float(pl.height)
 	var c := r.get_center()
 	Art.part(root, Art.box(Vector3(r.size.x, h, r.size.y)), Art.mat(Art.PALETTE.stone_dark), Vector3(c.x, h * 0.5, c.y))
-	Art.part(root, Art.box(Vector3(r.size.x - 0.2, 0.08, r.size.y - 0.2)), Art.mat(Color("4d5a45")), Vector3(c.x, h + 0.04, c.y), Vector3.ZERO, Vector3.ONE, false)
+	Art.part(root, Art.box(Vector3(r.size.x - 0.2, 0.08, r.size.y - 0.2)), Art.mat(_c("plateau_top")), Vector3(c.x, h + 0.04, c.y), Vector3.ZERO, Vector3.ONE, false)
 	_static_box(root, Vector3(c.x, h * 0.5, c.y), Vector3(r.size.x, h, r.size.y))
 	var ramp_len := 4.5
 	var ramp_w := 3.2
@@ -283,13 +308,15 @@ static func _decor(root: Node3D, map: MapDef) -> void:
 		if map.path.distance_to(p) < map.path_width * 0.5 + 0.5 or not map.plateau_at(p).is_empty():
 			continue
 		var env: Dictionary = DataDB.visuals().get("environment", {})
-		var decor: Array = env.get("decor", [])
+		var decor: Array = _t.get("decor", env.get("decor", []))
 		if not decor.is_empty():
 			var d := Assets.prop(decor[rng.randi() % decor.size()], float(env.get("decor_scale", 2.5)) * rng.randf_range(0.8, 1.2), rng.randf() * 360.0)
 			if d:
 				d.position = Vector3(p.x, 0, p.y)
 				for mi in Assets._meshes(d):
 					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				if str(_t.decor_tint) != "":
+					Assets.tint(d, _c("decor_tint"), false)
 				root.add_child(d)
 				continue
 		if rng.randf() < 0.6:
@@ -306,6 +333,8 @@ static func _tree(root: Node3D, p: Vector2, rng: RandomNumberGenerator) -> void:
 		var t := Assets.prop(trees[rng.randi() % trees.size()], float(env.get("tree_scale", 3.5)) * rng.randf_range(0.8, 1.5), rng.randf() * 360.0)
 		if t:
 			t.position = Vector3(p.x, 0, p.y)
+			if str(_t.tree_tint) != "":
+				Assets.tint(t, _c("tree_tint"), false, bool(_t.get("tree_flat", false)))
 			root.add_child(t)
 			return
 	var s := rng.randf_range(0.8, 1.6)

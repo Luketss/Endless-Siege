@@ -118,3 +118,13 @@ O golpe básico não alcança voadores, então a defesa antiaérea depende das t
 - **Essência:** 1 por onda, 4 por batalha, 8 por elite, 30 pelo chefe, +20 pela vitória, multiplicada pelos desafios ativos.
 - **Santuário:** desbloqueia Estandarte, Piche, relíquias lendárias e desafios. Desbloqueios ampliam as opções, nunca dão atributos permanentes.
 - **Desafios:** Hordas (+40% de inimigos), Núcleo de Vidro (−50 de vida), Inimigos Velozes (+20%), Escassez (−30% de ouro). Cada um rende +30–40% de essência.
+
+## Campos de batalha
+
+| Mapa | Como obter | Característica |
+|---|---|---|
+| Floresta Corrompida | Desde o início | Estrada em zigue-zague curto, dois platôs laterais |
+| Passo Congelado | Santuário, 20 de essência | Estrada de montanha mais longa e sinuosa, com platôs nos dois flancos. Como as torres têm mais tempo de tiro, as ondas recebem +30% de orçamento (`wave_budget_bonus`) |
+
+Cada mapa define seu bioma em `data/maps/*.json`, e as cores, o céu e os adereços de cada bioma ficam em `data/visuals.json` → `biomes`. Um teste valida todos os mapas: estrada dentro dos limites e terminando no núcleo, obstáculos, muros e platôs fora da estrada, e trechos paralelos com espaço para torres.
+

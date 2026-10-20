@@ -84,8 +84,8 @@ static func play_combat(run: RunState, node: Dictionary, pilot: Autopilot, dt: f
 
 
 ## Plays a full journey choosing random paths and rewards. Returns the final run.
-static func play_journey(seed_value: int, unlocks: Array = [], modifiers: Array = []) -> RunState:
-	var run := RunState.create(seed_value, "ranger", modifiers, unlocks)
+static func play_journey(seed_value: int, unlocks: Array = [], modifiers: Array = [], map_id: String = "forest") -> RunState:
+	var run := RunState.create(seed_value, "ranger", modifiers, unlocks, map_id)
 	var pilot := Autopilot.new(seed_value)
 	while not run.finished:
 		var options := Journey.choices(run.journey, run.current_node)
