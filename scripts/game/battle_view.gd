@@ -88,7 +88,7 @@ func _sync_enemies(delta: float) -> void:
 			_animate_enemy(node, e)
 		var parts: Dictionary = node.get_meta("parts")
 		var body: Node3D = parts.get("body")
-		if body and not e.flying and e.frozen_t <= 0.0:
+		if body and not e.flying and e.frozen_t <= 0.0 and e.stun_t <= 0.0:
 			var base_y: float = body.get_meta("base_y", body.position.y)
 			body.set_meta("base_y", base_y)
 			body.position.y = base_y + absf(sin(_time * e.speed * 3.0 + e.id)) * e.size * 0.12
@@ -147,7 +147,7 @@ func _animate_enemy(node: Node3D, e: Units.Enemy) -> void:
 	var player: AnimationPlayer = node.get_meta("anim")
 	if player == null:
 		return
-	if e.frozen_t > 0.0 or e.launched_t > 0.0:
+	if e.frozen_t > 0.0 or e.launched_t > 0.0 or e.stun_t > 0.0:
 		player.speed_scale = 0.0
 		return
 	if node.has_meta("attack_until") and _time < float(node.get_meta("attack_until")):

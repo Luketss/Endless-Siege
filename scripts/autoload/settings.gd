@@ -248,6 +248,12 @@ func _apply_input() -> void:
 				InputMap.action_add_event(action, e)
 
 
+## Keyboard/mouse binding only (the remapping screen), whatever device is active.
+func key_label(action: String) -> String:
+	var list := bindings_for(action)
+	return display_name(list[0]) if not list.is_empty() else "—"
+
+
 func action_label(action: String) -> String:
 	if using_pad:
 		var pad: Array = PAD_BINDINGS.get(action, [])

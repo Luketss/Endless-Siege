@@ -67,7 +67,7 @@ Os menus funcionam com D-pad, A e B. As dicas na tela trocam para os botões do 
 ## Testes e ferramentas
 
 ```bash
-GODOT=/caminho/godot tools/run_tests.sh             # 79 testes headless (regras, IA, cenas, input, assets)
+GODOT=/caminho/godot tools/run_tests.sh             # 80 testes headless (regras, IA, cenas, input, assets)
 python3 tools/check_translations.py                 # todas as chaves de texto existem em PT/EN
 godot --headless --path . --script res://tools/balance_sim.gd   # jornadas simuladas (balanceamento)
 GODOT=/caminho/godot tools/export_all.sh            # builds de Windows e Linux em build/

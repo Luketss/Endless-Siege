@@ -364,6 +364,9 @@ func _finish_run() -> void:
 
 func _set_paused(v: bool) -> void:
 	_paused = v
+	# The sim is frozen by the flag; the hero (and gamepad menu navigation) must not
+	# move, dodge or cast behind the pause menu.
+	hero.input_enabled = not v and (phase == "build" or phase == "wave")
 	if v:
 		rig.set_captured(false)
 		_set_overlay(_pause_menu())

@@ -705,7 +705,7 @@ func _fire(st: Units.Structure, target: Units.Enemy) -> void:
 
 
 func _predict(e: Units.Enemy, t: float) -> Vector3:
-	if e.flying or e.frozen_t > 0.0 or e.launched_t > 0.0:
+	if e.flying or e.frozen_t > 0.0 or e.stun_t > 0.0 or e.launched_t > 0.0:
 		return e.pos
 	var spd := e.speed * ((1.0 - e.chill_slow) if e.chill_t > 0.0 else 1.0)
 	var p := map.path.sample(e.s + spd * t)
