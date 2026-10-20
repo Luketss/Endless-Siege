@@ -18,7 +18,7 @@ func setup(p_run: RunState) -> void:
 	theme = UITheme.get_theme()
 	UITheme.full_rect(self)
 	var dim := ColorRect.new()
-	dim.color = Color(0.03, 0.03, 0.05, 0.72)
+	dim.color = Color(0.03, 0.03, 0.05, 0.84)
 	UITheme.full_rect(dim)
 	add_child(dim)
 	var margin := MarginContainer.new()
@@ -87,7 +87,10 @@ func refresh() -> void:
 		var bg := col.darkened(0.55) if visited else Color(0.08, 0.09, 0.12)
 		for st in ["normal", "hover", "pressed", "disabled"]:
 			b.add_theme_stylebox_override(st, UITheme.box(bg if st != "hover" else col.darkened(0.3), 40, col if (ids.has(id) or visited) else col.darkened(0.5), bw, 6))
-		b.modulate = Color.WHITE if (ids.has(id) or visited) else Color(1, 1, 1, 0.5)
+		# Nodes behind the expedition fade out; the road ahead stays readable.
+		var cur := Journey.find(run.journey, run.current_node)
+		var passed := not cur.is_empty() and int(node.layer) <= int(cur.layer) and not visited
+		b.modulate = Color.WHITE if (ids.has(id) or visited) else Color(1, 1, 1, 0.3 if passed else 0.8)
 	_graph.queue_redraw()
 
 
@@ -115,7 +118,9 @@ func _node_pos(node: Dictionary) -> Vector2:
 	var w := _graph.size.x
 	var h := _graph.size.y
 	var x := 70.0 + (w - 140.0) * float(node.layer) / maxf(1, n_layers - 1)
-	var y := h * 0.5 if count == 1 else 80.0 + (h - 160.0) * float(node.index) / (count - 1)
+	# Rows centred with a fixed spacing (capped by height) instead of edge to edge.
+	var gap := minf(170.0, (h - 120.0) / maxf(1, count - 1))
+	var y := h * 0.5 + (float(node.index) - (count - 1) * 0.5) * gap
 	return Vector2(x, y)
 
 
@@ -134,7 +139,12 @@ func _draw_links() -> void:
 			for link in node.links:
 				var other := Journey.find(run.journey, link)
 				var b := _node_pos(other)
+				# Start and end at the button edges so lines never run under the labels.
+				var d := (b - a).normalized()
+				var trim := minf(62.0 / maxf(0.001, absf(d.x)), 35.0 / maxf(0.001, absf(d.y))) + 4.0
+				var p0 := a + d * trim
+				var p1 := b - d * trim
 				var walked: bool = run.visited.has(node.id) and run.visited.has(link)
 				var next: bool = node.id == run.current_node
-				var col := UITheme.GOLD if walked else (Color(1, 1, 1, 0.55) if next else Color(1, 1, 1, 0.15))
-				_graph.draw_line(a, b, col, 4.0 if walked or next else 2.0, true)
+				var col := UITheme.GOLD if walked else (Color(1, 1, 1, 0.7) if next else Color(1, 1, 1, 0.22))
+				_graph.draw_line(p0, p1, col, 4.0 if walked or next else 2.0, true)

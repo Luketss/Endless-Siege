@@ -82,6 +82,14 @@ func _process(delta: float) -> void:
 	if target:
 		var goal := target.global_position + Vector3(0, 1.7, 0)
 		global_position = global_position.lerp(goal, minf(1.0, delta * 14.0))
+	var look := Input.get_vector("look_left", "look_right", "look_up", "look_down")
+	if look != Vector2.ZERO and is_captured():
+		var sens := float(Settings.get_value("mouse_sensitivity"))
+		var inv := -1.0 if Settings.get_value("invert_y") else 1.0
+		# Squared response: fine aim near the centre, fast turns at full tilt.
+		look *= look.length()
+		yaw -= look.x * 3.0 * sens * delta
+		pitch = clampf(pitch - look.y * 1.8 * sens * inv * delta, MIN_PITCH, MAX_PITCH)
 	rotation = Vector3(pitch, yaw, 0)
 	spring.spring_length = lerpf(spring.spring_length, distance, minf(1.0, delta * 8.0))
 	spring.position = _shoulder

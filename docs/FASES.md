@@ -51,11 +51,11 @@ Cada fase indica o critério de conclusão, como reproduzir e o estado atual. "�
 | Builds de Windows e Linux pela CLI e pela CI | Executar e testar o build de Windows em máquina Windows |
 | Modelos de upload SteamPipe | IDs de app/depot, integração GodotSteam, conquistas, Steam Cloud |
 | Checklist da loja | Página da loja, trailer, cápsulas, requisitos mínimos medidos |
-| | Suporte a controle (necessário para o Steam Deck "Verificado") |
+| Suporte a controle (layout Xbox, menus pelo D-pad) | Teste em Steam Deck real |
 
 ## Próximo conteúdo (depois de validar o núcleo)
 
-1. Guerreiro e Mago (os dados de herói já suportam vários heróis; faltam modelo e habilidades em `HeroController`).
+1. Mais heróis (Patrulheira, Guerreiro e Maga prontos; heróis são definidos em `data/heroes.json` e as habilidades ficam em `BattleSim`).
 2. Novos biomas e mapas (ruínas, fortalezas, cavernas) com desafios ambientais.
 3. Estruturas de atração ou agrupamento (iscas) e armadilhas elementais adicionais.
 4. Mais eventos, relíquias e chefes.

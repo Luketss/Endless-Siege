@@ -27,7 +27,9 @@ func test_all_referenced_assets_load() -> void:
 func test_creature_animations_exist() -> void:
 	var vis := DataDB.visuals()
 	var cfgs: Dictionary = vis.enemies.duplicate()
-	cfgs["hero"] = vis.hero
+	for id in vis.heroes:
+		cfgs["hero_" + id] = vis.heroes[id]
+	check(vis.heroes.has_all(DataDB.heroes().keys()), "every hero has visuals")
 	for key in cfgs:
 		var node := Assets.creature(cfgs[key])
 		check(node != null, "%s builds" % key)
@@ -67,3 +69,12 @@ func test_licenses_present() -> void:
 			"res://assets/models/quaternius/monsters", "res://assets/models/quaternius/rpg"]:
 		check(FileAccess.file_exists(dir.path_join("License.txt")), "license in %s" % dir)
 	check(FileAccess.file_exists("res://assets/CREDITS.md"), "credits file")
+
+
+func test_recorded_sounds_load() -> void:
+	var sfx: Node = Engine.get_main_loop().root.get_node("Sfx")
+	for name in sfx.RECORDED:
+		var spec: Array = sfx.RECORDED[name]
+		for i in range(1, spec.size()):
+			var path: String = sfx.DIR + spec[i] + ".ogg"
+			check(ResourceLoader.exists(path) and load(path) is AudioStream, "%s: %s.ogg" % [name, spec[i]])

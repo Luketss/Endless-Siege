@@ -141,3 +141,12 @@ func test_flyers_ignore_road_and_ground_traps() -> void:
 	run(sim, 3.0)
 	check(w.pos.y > 2.0, "flying height")
 	check_eq(w.hp, w.max_hp, "ground trap cannot hit flyers")
+
+
+func test_towers_do_not_lead_stunned_enemies() -> void:
+	var sim := make_sim()
+	var e := sim.spawn_enemy("brute", false, 30.0, 0.0)
+	sim.step(DT)
+	check(sim._predict(e, 1.0).distance_to(e.pos) > 0.5, "moving enemies are led")
+	e.stun_t = 1.0
+	check_near(sim._predict(e, 1.0).distance_to(e.pos), 0.0, 0.01, "stunned enemies are not led")

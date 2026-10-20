@@ -20,11 +20,25 @@
 		"golem":     { "scene": "res://assets/models/quaternius/monsters/Dragon.fbx", "scale": 1.2, "rot_y": 180, "y": 0.6, "bar_y": 6.5,
 			"anims": { "move": "DragonArmature|Dragon_Flying", "death": "DragonArmature|Dragon_Death", "attack": "DragonArmature|Dragon_Attack" } }
 	},
-	"hero": {
-		"scene": "res://assets/models/quaternius/rpg/Ranger.fbx", "scale": 0.55, "rot_y": 180,
-		"textures": { "Ranger_Bow": "res://assets/models/quaternius/rpg/Ranger_Bow_Texture.png", "*": "res://assets/models/quaternius/rpg/Ranger_Texture.png" },
-		"anims": { "idle": "CharacterArmature|Idle_Weapon", "run": "CharacterArmature|Run", "shoot": "CharacterArmature|Bow_Attack_Shoot",
-			"roll": "CharacterArmature|Roll", "death": "CharacterArmature|Death", "cast": "CharacterArmature|Bow_Attack_Draw" }
+	"heroes": {
+		"ranger": {
+			"scene": "res://assets/models/quaternius/rpg/Ranger.fbx", "scale": 0.55, "rot_y": 180,
+			"textures": { "Ranger_Bow": "res://assets/models/quaternius/rpg/Ranger_Bow_Texture.png", "*": "res://assets/models/quaternius/rpg/Ranger_Texture.png" },
+			"anims": { "idle": "CharacterArmature|Idle_Weapon", "run": "CharacterArmature|Run", "attack": "CharacterArmature|Bow_Attack_Shoot",
+				"roll": "CharacterArmature|Roll", "death": "CharacterArmature|Death", "cast": "CharacterArmature|Bow_Attack_Draw" }
+		},
+		"mage": {
+			"scene": "res://assets/models/quaternius/rpg/Wizard.fbx", "scale": 0.52, "rot_y": 180,
+			"textures": { "Wizard_Staff": "res://assets/models/quaternius/rpg/Wizard_Staff_Texture.png", "*": "res://assets/models/quaternius/rpg/Wizard_Texture.png" },
+			"anims": { "idle": "CharacterArmature|Idle_Weapon", "run": "CharacterArmature|Run_Weapon", "attack": "CharacterArmature|Staff_Attack",
+				"roll": "CharacterArmature|Roll", "death": "CharacterArmature|Death", "cast": "CharacterArmature|Spell1" }
+		},
+		"warrior": {
+			"scene": "res://assets/models/quaternius/rpg/Warrior.fbx", "scale": 0.52, "rot_y": 180,
+			"textures": { "Warrior_Sword": "res://assets/models/quaternius/rpg/Warrior_Sword_Texture.png", "*": "res://assets/models/quaternius/rpg/Warrior_Texture.png" },
+			"anims": { "idle": "CharacterArmature|Idle_Weapon", "run": "CharacterArmature|Run_Weapon", "attack": "CharacterArmature|Sword_AttackFast",
+				"roll": "CharacterArmature|Roll", "death": "CharacterArmature|Death", "cast": "CharacterArmature|Sword_Attack" }
+		}
 	},
 	"structures": {
 		"arrow":  { "scale": 2.0, "stack": ["res://assets/models/kenney_td/tower-square-bottom-a.glb", "res://assets/models/kenney_td/tower-square-middle-a.glb", "res://assets/models/kenney_td/tower-square-top-a.glb"],
@@ -38,6 +52,18 @@
 	"projectiles": {
 		"arrow":     { "scene": "res://assets/models/kenney_td/weapon-ammo-arrow.glb", "scale": 1.4, "rot_y": 0 },
 		"ballistic": { "scene": "res://assets/models/kenney_td/weapon-ammo-cannonball.glb", "scale": 2.2, "rot_y": 0 }
+	},
+	"biomes": {
+		"corrupted_forest": {},
+		"frozen_pass": {
+			"sky_top": "1e2a44", "sky_horizon": "9fb4c8", "ground_horizon": "4a5a70", "ground_bottom": "141a26",
+			"fog": "a8bccf", "sun": "dde8ff", "sun_energy": 0.85,
+			"grass": "9eabba", "grass_dark": "6f7d8e", "patch": "a3bdd4", "dirt": "6c6763", "dirt_edge": "524e4b",
+			"plateau_top": "aab7c5", "tree_tint": "c3d3e2", "tree_flat": true, "decor_tint": "b8cadb",
+			"decor": ["res://assets/models/kenney_nature/rock_smallA.glb", "res://assets/models/kenney_nature/stump_old.glb",
+				"res://assets/models/kenney_nature/log.glb", "res://assets/models/kenney_td/detail-crystal.glb",
+				"res://assets/models/kenney_td/detail-crystal-large.glb", "res://assets/models/kenney_nature/plant_bush.glb"]
+		}
 	},
 	"environment": {
 		"trees": ["res://assets/models/kenney_nature/tree_pineDefaultA.glb", "res://assets/models/kenney_nature/tree_pineRoundA.glb",

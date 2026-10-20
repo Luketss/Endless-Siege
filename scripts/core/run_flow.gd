@@ -26,9 +26,11 @@ static func waves_for(run: RunState, node: Dictionary) -> Array:
 	rng.seed = run.node_seed(node.id, "waves")
 	var n := int(DataDB.journey().waves.get(node.type, 3))
 	var mods := run.mods()
+	# Maps with a longer road give towers more time, so they bring bigger waves.
+	var extra := float(DataDB.map(run.map_id).get("wave_budget_bonus", 0.0))
 	var out := []
 	for i in n:
-		out.append(WaveDirector.build_wave(node.type, int(node.layer), i, n, rng, mods, run.harder_next))
+		out.append(WaveDirector.build_wave(node.type, int(node.layer), i, n, rng, mods, run.harder_next + extra))
 	return out
 
 

@@ -217,6 +217,9 @@ static func projectile(style: String) -> Node3D:
 			Art.part(root, Art.sphere(0.32), Art.mat(Color("2a2b30"), 0.0, 0.3), Vector3.ZERO, Vector3.ZERO, Vector3.ONE, false)
 		"orb":
 			Art.part(root, Art.sphere(0.28), Art.mat(Art.PALETTE.ice, 4.0, 0.1), Vector3.ZERO, Vector3.ZERO, Vector3.ONE, false)
+		"fire_bolt":
+			Art.part(root, Art.sphere(0.26), Art.mat(Art.PALETTE.fire, 5.0, 1.0), Vector3.ZERO, Vector3.ZERO, Vector3.ONE, false)
+			Art.part(root, Art.cone(0.2, 0.7, 6), Art.mat(Color(1, 0.55, 0.15, 0.7), 4.0, 1.0, true, true), Vector3(0, 0, 0.35), Vector3(-90, 0, 0), Vector3.ONE, false)
 		"hero_arrow":
 			Art.part(root, Art.box(Vector3(0.05, 0.05, 1.0)), Art.mat(Color("eadbb0"), 1.5), Vector3.ZERO, Vector3.ZERO, Vector3.ONE, false)
 			Art.part(root, Art.box(Vector3(0.12, 0.12, 0.25)), Art.mat(Color("7fffb0"), 4.0), Vector3(0, 0, -0.5), Vector3.ZERO, Vector3.ONE, false)
@@ -253,8 +256,8 @@ static func cache() -> Node3D:
 	return root
 
 
-static func hero() -> Node3D:
-	var imported := Assets.creature(DataDB.visuals().get("hero", {}))
+static func hero(id: String = "ranger") -> Node3D:
+	var imported := Assets.creature(DataDB.visuals().get("heroes", {}).get(id, {}))
 	if imported:
 		imported.set_meta("parts", {})
 		return imported

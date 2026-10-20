@@ -88,7 +88,7 @@ func _sync_enemies(delta: float) -> void:
 			_animate_enemy(node, e)
 		var parts: Dictionary = node.get_meta("parts")
 		var body: Node3D = parts.get("body")
-		if body and not e.flying and e.frozen_t <= 0.0:
+		if body and not e.flying and e.frozen_t <= 0.0 and e.stun_t <= 0.0:
 			var base_y: float = body.get_meta("base_y", body.position.y)
 			body.set_meta("base_y", base_y)
 			body.position.y = base_y + absf(sin(_time * e.speed * 3.0 + e.id)) * e.size * 0.12
@@ -147,7 +147,7 @@ func _animate_enemy(node: Node3D, e: Units.Enemy) -> void:
 	var player: AnimationPlayer = node.get_meta("anim")
 	if player == null:
 		return
-	if e.frozen_t > 0.0 or e.launched_t > 0.0:
+	if e.frozen_t > 0.0 or e.launched_t > 0.0 or e.stun_t > 0.0:
 		player.speed_scale = 0.0
 		return
 	if node.has_meta("attack_until") and _time < float(node.get_meta("attack_until")):
@@ -510,9 +510,27 @@ func handle_event(e: Dictionary) -> void:
 			Sfx.play("gold")
 		"hero_fire":
 			Sfx.play_at("bow", e.pos, 0.03)
+		"hero_swing":
+			var d := (e.dir as Vector3).normalized()
+			fx.ring(e.pos - Vector3(0, 0.9, 0) + d * 1.4, 1.6, Color(1, 1, 1, 0.6), 0.18, 0.08)
+			Sfx.play_at("dodge" if int(e.hits) == 0 else "hit", e.pos, 0.03, 1.2)
 		"ability":
 			if e.name == "rain":
 				fx.ring(e.pos, 4.2, Color("aaffb8"), 0.5)
+			elif e.name == "slam":
+				fx.ring(e.pos, float(e.radius), Color("ffd27a"), 0.5, 0.2)
+				fx.burst(e.pos, float(e.radius) * 0.7, Color(0.7, 0.55, 0.35, 0.45), 0.35)
+				Sfx.play_at("stomp", e.pos, 0.0, 1.3)
+			elif e.name == "nova":
+				fx.ring(e.pos, float(e.radius), Art.PALETTE.ice, 0.5, 0.2)
+				fx.burst(e.pos + Vector3(0, 0.5, 0), float(e.radius) * 0.8, Color(0.6, 0.9, 1.0, 0.45), 0.35)
+				Sfx.play_at("frost", e.pos, 0.0, 0.8)
+				return
+			elif e.name == "chain":
+				Sfx.play_at("hex", e.pos, 0.0, 1.6)
+				return
+			elif e.name == "charge":
+				fx.sparks(e.pos + Vector3(0, 0.6, 0), Color("ffe0a0"), 14, 6.0)
 			else:
 				fx.burst(e.pos + Vector3(0, 1, 0) + (e.dir as Vector3).normalized() * 2.5, 3.0, Color(0.8, 1.0, 0.85, 0.5), 0.3)
 			Sfx.play_at("spring", e.pos, 0.0, 1.3)

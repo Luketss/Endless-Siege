@@ -11,6 +11,7 @@ var _bind_buttons := {}
 func _ready() -> void:
 	theme = UITheme.get_theme()
 	UITheme.full_rect(self)
+	set_meta("screen", true)  # its own screen for gamepad focus (PadFocus)
 	add_child(UITheme.dimmer())
 	var center := CenterContainer.new()
 	UITheme.full_rect(center)
@@ -33,6 +34,8 @@ func _ready() -> void:
 		closed.emit()
 		queue_free())
 	v.add_child(close)
+	if Settings.using_pad:
+		tabs.get_tab_bar().grab_focus.call_deferred()
 
 
 func _row(parent: Control, text: String, control: Control) -> void:
@@ -143,12 +146,19 @@ func _game_tab() -> Control:
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size = Vector2(800, 0)
 	v.add_child(hint)
+	var replay := UITheme.button(tr("SET_TUTORIAL"))
+	replay.pressed.connect(func():
+		Profile.data.seen_tutorial = false
+		Profile.save()
+		replay.text = tr("SET_TUTORIAL_DONE")
+		replay.disabled = true)
+	v.add_child(replay)
 	return v
 
 
 func _refresh_binds() -> void:
 	for action in _bind_buttons:
-		(_bind_buttons[action] as Button).text = Settings.action_label(action)
+		(_bind_buttons[action] as Button).text = Settings.key_label(action)
 
 
 func _input(event: InputEvent) -> void:

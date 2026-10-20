@@ -8,6 +8,7 @@ const DEFAULTS := {
 	"essence": 0,
 	"essence_total": 0,
 	"unlocks": [],
+	"achievements": [],
 	"modifiers": [],
 	"stats": {"runs": 0, "victories": 0, "best_layer": 0, "kills": 0, "waves": 0},
 	"seen_tutorial": false,
@@ -63,9 +64,33 @@ func challenges_available() -> bool:
 
 # ---------------------------------------------------------------- runs
 
-func new_run(modifiers: Array) -> RunState:
+## Heroes the player can pick: always the Ranger, others once unlocked in the Sanctuary.
+func available_heroes() -> Array:
+	var out := []
+	for id in DataDB.heroes():
+		var unlock: String = DataDB.heroes()[id].get("unlock", "")
+		if unlock == "" or is_unlocked(unlock):
+			out.append(id)
+	return out
+
+
+## Battlefields: the forest, plus maps unlocked in the Sanctuary.
+func available_maps() -> Array:
+	var out := ["forest"]
+	for id in DataDB.unlocks():
+		var u: Dictionary = DataDB.unlocks()[id]
+		if u.kind == "map" and is_unlocked(id):
+			out.append(u.map)
+	return out
+
+
+func new_run(modifiers: Array, hero_id: String = "ranger", map_id: String = "forest") -> RunState:
 	var seed_value := int(Time.get_unix_time_from_system()) ^ randi()
-	active_run = RunState.create(seed_value, "ranger", modifiers, data.unlocks)
+	if not available_heroes().has(hero_id):
+		hero_id = "ranger"
+	if not available_maps().has(map_id):
+		map_id = "forest"
+	active_run = RunState.create(seed_value, hero_id, modifiers, data.unlocks, map_id)
 	data.stats.runs = int(data.stats.runs) + 1
 	save()
 	save_run(active_run)
@@ -104,6 +129,13 @@ func finish_run(run: RunState) -> int:
 	st.waves = int(st.waves) + int(run.stats.waves)
 	if Settings.get_value("run_log"):
 		RunLog.append(run)
+	var earned := Achievements.check(run, st, data.get("achievements", []))
+	if not data.has("achievements"):
+		data.achievements = []
+	for id in earned:
+		(data.achievements as Array).append(id)
+		SteamService.unlock(id)
+	set_meta("last_achievements", earned)
 	save()
 	clear_run()
 	return gained

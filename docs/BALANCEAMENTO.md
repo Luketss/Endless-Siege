@@ -7,7 +7,10 @@
 ```bash
 SIM_RUNS=12 godot --headless --path . --script res://tools/balance_sim.gd
 SIM_RUNS=12 SIM_MODS=hordes,swift_foes godot --headless --path . --script res://tools/balance_sim.gd
+SIM_RUNS=12 SIM_MAP=frost godot --headless --path . --script res://tools/balance_sim.gd
 ```
+
+No Passo Congelado, a estrada mais longa levou o autopiloto a 50% de vitórias. Com `wave_budget_bonus` de 0,3, caiu para **33% (4/12)**, perto dos 25% da floresta.
 
 ## Iterações
 

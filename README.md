@@ -15,7 +15,7 @@ Feito em **Godot 4.3** (GDScript). Personagens, inimigos, torres e cenário usam
 | # | Item | Status |
 |---|---|---|
 | 1 | Um mapa funcional | ✅ Floresta Corrompida: estrada sinuosa, platôs com rampa (+20% de alcance), obstáculos que bloqueiam a linha de visão, muralhas |
-| 2 | Herói controlável | ✅ Patrulheira: WASD, câmera no ombro, tiro com mira assistida, Chuva de Flechas (Q), Rajada Concussiva (E), esquiva (Espaço), interação (F), níveis na jornada |
+| 2 | Heróis controláveis | ✅ Maga elemental e Guerreiro corpo a corpo (desbloqueáveis) e Patrulheira: WASD, câmera no ombro, tiro com mira assistida, Chuva de Flechas (Q), Rajada Concussiva (E), esquiva (Espaço), interação (F), níveis na jornada |
 | 3 | Três torres | ✅ Flechas, Canhão, Pináculo Gélido, mais o Estandarte de Guerra (suporte, desbloqueável) |
 | 4 | Duas armadilhas | ✅ Espinhos, Placa de Mola (empurrão), mais o Poço de Piche (óleo/lentidão, desbloqueável) |
 | 5 | Cinco tipos de inimigos | ✅ 7 tipos + fragmento: básico, rápido, blindado, voador, divisor, feiticeiro (desativa torres), guardião (protege aliados) |
@@ -49,10 +49,25 @@ O que ainda falta (identidade visual própria, áudio gravado, integração com 
 | Esquiva | Espaço | Velocidade do jogo (1× / 1,5× / 2×) | T |
 | Interagir (suprimentos) | F | Pausa | Esc |
 
+Q e E mostram a área ou o cone enquanto estão pressionados e disparam ao soltar; um toque rápido dispara na hora, e o botão direito cancela a mira.
+
+### Controle (Xbox / Steam Deck)
+
+| Ação | Botão | Ação | Botão |
+|---|---|---|---|
+| Mover / câmera | Analógico esquerdo / direito | Escolher estrutura | D-pad ← → |
+| Atirar / posicionar | RT | Melhorar / vender | D-pad ↑ ↓ |
+| Chuva / Rajada | LB / RB | Alvo da torre | R3 |
+| Esquiva | A | Iniciar onda | Y |
+| Interagir | X | Cancelar | B |
+| Velocidade | L3 | Mostrar alcances / pausa | View / Menu |
+
+Os menus funcionam com D-pad, A e B. As dicas na tela trocam para os botões do controle quando ele é usado.
+
 ## Testes e ferramentas
 
 ```bash
-GODOT=/caminho/godot tools/run_tests.sh             # 64 testes headless (regras, IA, cenas, input, assets)
+GODOT=/caminho/godot tools/run_tests.sh             # 80 testes headless (regras, IA, cenas, input, assets)
 python3 tools/check_translations.py                 # todas as chaves de texto existem em PT/EN
 godot --headless --path . --script res://tools/balance_sim.gd   # jornadas simuladas (balanceamento)
 GODOT=/caminho/godot tools/export_all.sh            # builds de Windows e Linux em build/

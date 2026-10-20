@@ -5,6 +5,8 @@ extends Node3D
 var ui: Control
 var _pages := {}
 var _modifiers: Array = []
+var _hero := "ranger"
+var _map := "forest"
 var _rig: CameraRig
 
 
@@ -70,7 +72,13 @@ func _left_column() -> Control:
 	v.custom_minimum_size = Vector2(520, 0)
 	v.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	v.add_theme_constant_override("separation", 16)
-	m.add_child(v)
+	# Long pages (sanctuary, new journey) scroll instead of running off screen.
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	scroll.follow_focus = true
+	scroll.add_child(v)
+	m.add_child(scroll)
 	var holder := Control.new()
 	UITheme.full_rect(holder)
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -125,17 +133,56 @@ func _new_run_page() -> Control:
 	var v: VBoxContainer = holder.get_meta("column")
 	v.add_child(UITheme.label(tr("MENU_NEW_RUN"), "Header"))
 	v.add_child(UITheme.label(tr("MENU_CHOOSE_HERO"), "Dim"))
-	var hero := PanelContainer.new()
-	var hv := VBoxContainer.new()
-	hero.add_child(hv)
-	hv.add_child(UITheme.label(tr("H_RANGER"), "Header"))
-	var d := RichTextLabel.new()
-	d.bbcode_enabled = true
-	d.fit_content = true
-	d.custom_minimum_size = Vector2(480, 0)
-	d.text = tr("H_RANGER_DESC")
-	hv.add_child(d)
-	v.add_child(hero)
+	var heroes := Profile.available_heroes()
+	if not heroes.has(_hero):
+		_hero = "ranger"
+	var group := ButtonGroup.new()
+	for id in DataDB.heroes():
+		var def: Dictionary = DataDB.heroes()[id]
+		var owned := heroes.has(id)
+		var card := Button.new()
+		card.toggle_mode = true
+		card.button_group = group
+		card.button_pressed = id == _hero
+		card.disabled = not owned
+		card.custom_minimum_size = Vector2(520, 0)
+		card.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		var hv := VBoxContainer.new()
+		hv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hv.position = Vector2(12, 8)
+		card.add_child(hv)
+		hv.add_child(UITheme.label(tr(def.name_key) if owned else "%s  ·  %s" % [tr(def.name_key), tr("MENU_HERO_LOCKED")], "Header"))
+		var d := RichTextLabel.new()
+		d.bbcode_enabled = true
+		d.fit_content = true
+		d.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		d.custom_minimum_size = Vector2(500, 0)
+		d.text = tr(def.desc_key)
+		hv.add_child(d)
+		card.toggled.connect(func(on):
+			if on:
+				_hero = id)
+		v.add_child(card)
+		# Buttons do not size to custom children: follow the content height.
+		hv.resized.connect(func(): card.custom_minimum_size.y = hv.size.y + 16)
+		card.custom_minimum_size.y = 150
+	var maps := Profile.available_maps()
+	if maps.size() > 1:
+		v.add_child(UITheme.label(tr("MENU_CHOOSE_MAP"), "Header"))
+		var row := HBoxContainer.new()
+		var mgroup := ButtonGroup.new()
+		for mid in maps:
+			var mb := UITheme.button(tr(DataDB.map(mid).name_key), false, Vector2(250, 52))
+			mb.toggle_mode = true
+			mb.button_group = mgroup
+			mb.button_pressed = mid == _map
+			mb.toggled.connect(func(on):
+				if on:
+					_map = mid)
+			row.add_child(mb)
+		v.add_child(row)
+	elif not maps.has(_map):
+		_map = "forest"
 	if Profile.challenges_available():
 		v.add_child(UITheme.label(tr("MENU_CHALLENGES"), "Header"))
 		for mid in DataDB.modifiers():
@@ -156,7 +203,7 @@ func _new_run_page() -> Control:
 	start.pressed.connect(func():
 		Profile.data.modifiers = _modifiers.duplicate()
 		Profile.clear_run()
-		Profile.new_run(_modifiers)
+		Profile.new_run(_modifiers, _hero, _map)
 		get_tree().change_scene_to_file("res://scenes/game.tscn"))
 	v.add_child(start)
 	var back := UITheme.button(tr("BACK"))
@@ -202,6 +249,18 @@ func _sanctuary() -> Control:
 					_show("sanctuary"))
 		h.add_child(b)
 		v.add_child(row)
+	var owned: Array = Profile.data.get("achievements", [])
+	v.add_child(UITheme.label("%s  %d / %d" % [tr("MENU_ACHIEVEMENTS"), owned.size(), DataDB.achievements().size()], "Header"))
+	var ach := RichTextLabel.new()
+	ach.bbcode_enabled = true
+	ach.fit_content = true
+	ach.custom_minimum_size = Vector2(620, 0)
+	var txt := ""
+	for id in DataDB.achievements():
+		var has := owned.has(id)
+		txt += "[color=%s]%s %s[/color]\n" % ["#f2c14e" if has else "#7a7f90", "★" if has else "☆", tr(DataDB.achievements()[id].name_key)]
+	ach.text = txt
+	v.add_child(ach)
 	var back := UITheme.button(tr("BACK"))
 	back.pressed.connect(func(): _build_and_home())
 	v.add_child(back)

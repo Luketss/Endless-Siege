@@ -194,3 +194,140 @@ func test_stepping_away_avoids_enemy_attack() -> void:
 	run(sim, 0.6)
 	check_eq(sim.hero.hp, sim.hero.max_hp, "out of reach when the windup ends")
 	check(e.contact_cd > 0.0, "attack spent")
+
+
+func test_tutorial_advances_on_actions() -> void:
+	var sim := make_sim()
+	var tut := Tutorial.new(Vector3.ZERO)
+	var ctx := {"hero_pos": Vector3.ZERO, "sim": sim, "selected": "", "phase": "build", "dt": 0.1}
+	check(not tut.update(ctx) and tut.step == 0, "waits until the hero moves")
+	check(tut.text() != "", "objective text")
+	ctx.hero_pos = Vector3(5, 0, 0)
+	check(tut.update(ctx) and tut.step == 1, "move done")
+	sim.hero.pos = Vector3(0, 0, 20)
+	sim.hero_attack(sim.hero.pos, Vector3.FORWARD)
+	tut.update(ctx)
+	ctx.selected = "arrow"
+	tut.update(ctx)
+	check_eq(tut.step, 3, "shoot and pick done")
+	var p := sim.map.path.sample(30.0)
+	var t := sim.map.path.tangent(30.0)
+	check(sim.build("arrow", p + Vector2(-t.y, t.x) * 4.6) != null or sim.build("arrow", p - Vector2(-t.y, t.x) * 4.6) != null, "built")
+	tut.update(ctx)
+	sim.hero_rain(Vector3(0, 0, 10))
+	tut.update(ctx)
+	ctx.phase = "wave"
+	tut.update(ctx)
+	check_eq(tut.step, 6, "place, ability and wave done")
+	for i in 80:
+		tut.update(ctx)
+	check(tut.done(), "core reminder times out")
+
+
+func _warrior_near(type: String = "brute") -> Array:
+	var sim := make_sim(1000, [], 1, ["banner", "tar"], "warrior")
+	var e := sim.spawn_enemy(type, false, 30.0, 0.0)
+	sim.step(DT)
+	return [sim, e]
+
+
+func test_warrior_swing_hits_in_front_only() -> void:
+	var setup := _warrior_near()
+	var sim: BattleSim = setup[0]
+	var e: Units.Enemy = setup[1]
+	sim.hero.pos = e.pos + Vector3(2, 0, 0)  # enemy 2 m to the -X side
+	check(sim.hero_attack(sim.hero.pos, Vector3(1, 0, 0)), "swing")
+	check_eq(e.hp, e.max_hp, "enemy behind is not hit")
+	sim.hero.attack_cd = 0.0
+	check(sim.hero_attack(sim.hero.pos, Vector3(-1, 0, 0)), "swing again")
+	check(e.hp < e.max_hp, "enemy in front is hit")
+
+
+func test_warrior_slam_stuns_and_charge_pushes() -> void:
+	var setup := _warrior_near()
+	var sim: BattleSim = setup[0]
+	var e: Units.Enemy = setup[1]
+	sim.hero.pos = e.pos + Vector3(1.5, 0, 0)
+	check(sim.hero_slam(), "slam")
+	check(e.stun_t > 0.0 and e.hp < e.max_hp, "stunned and damaged")
+	var s_before := e.s
+	run(sim, 0.5)
+	check_near(e.s, s_before, 0.01, "stunned enemies do not move")
+	check(not sim.hero_slam(), "slam cooldown")
+	run(sim, 1.2)
+	sim.hero.pos = e.pos + Vector3(3, 0, 0)
+	var hp := e.hp
+	check(sim.hero_charge(Vector3(-1, 0, 0)), "charge")
+	check(e.hp < hp and e.launched_t > 0.0, "charge hits and knocks back")
+	check(sim.hero.invuln_t > 0.0, "invulnerable while charging")
+	check_eq(sim.ability_id(0), "slam")
+
+
+func test_warrior_needs_unlock() -> void:
+	check(DataDB.heroes().has("warrior"))
+	check_eq(str(DataDB.heroes().warrior.unlock), "warrior")
+	check(DataDB.unlocks().has("warrior"), "sold in the sanctuary")
+	var run := RunState.create(4, "warrior", [], [])
+	check_eq(RunFlow.make_sim(run).hero.def.name_key, "H_WARRIOR")
+
+
+func test_frost_map_plays() -> void:
+	var run := RunState.create(3, "ranger", [], [], "frost")
+	var copy := RunState.from_dict(JSON.parse_string(JSON.stringify(run.to_dict())))
+	check_eq(copy.map_id, "frost", "map survives save/load")
+	var node := RunFlow.enter(run, "0-0")
+	var cleared := Autopilot.play_combat(run, node, Autopilot.new(3))
+	check_eq(cleared, 3, "first fight on the frost map is winnable")
+	check(not run.structures.is_empty())
+	check(DataDB.unlocks().frost_map.map == "frost", "unlockable")
+
+
+func test_achievements() -> void:
+	var run := RunState.create(5, "warrior", ["hordes"], [], "frost")
+	check(Achievements.check(run, {}, []).is_empty(), "nothing for an empty defeat")
+	run.victory = true
+	run.finished = true
+	run.core_hp = run.core_max()
+	var got := Achievements.check(run, {"kills": 2500}, [])
+	for id in ["first_victory", "fortress", "challenger", "blade_master", "frostbitten", "slayer"]:
+		check(got.has(id), "earned %s" % id)
+	check(not Achievements.check(run, {"kills": 2500}, got).has("first_victory"), "owned ones are skipped")
+	run.core_hp = run.core_max() * 0.5
+	check(not Achievements.check(run, {}, []).has("fortress"), "fortress needs 75% core")
+	for id in DataDB.achievements():
+		check(DataDB.achievements()[id].has("rule"), "%s has a rule" % id)
+
+
+func test_mage_abilities() -> void:
+	var sim := make_sim(1000, [], 1, ["banner", "tar"], "mage")
+	var a := sim.spawn_enemy("brute", false, 30.0, 0.0)
+	var b := sim.spawn_enemy("brute", false, 32.0, 0.0)
+	var c := sim.spawn_enemy("brute", false, 34.0, 0.0)
+	sim.step(DT)
+	check(sim.hero_nova(a.pos), "nova")
+	check(a.is_chilled() and a.frozen_t > 0.0 and a.hp < a.max_hp, "nova chills, freezes and damages")
+	check(not sim.hero_nova(a.pos), "nova cooldown")
+	sim.hero.pos = a.pos + Vector3(4, 0, 0)
+	var hp := [a.hp, b.hp, c.hp]
+	check(sim.hero_chain(sim.hero.pos, a.pos), "chain")
+	check(a.hp < hp[0] and b.hp < hp[1] and c.hp < hp[2], "chain jumps between enemies")
+	var arcs := sim.events.filter(func(ev): return ev.type == "arc")
+	check(arcs.size() >= 3, "arc per target (%d)" % arcs.size())
+	check(not sim.hero_chain(sim.hero.pos, a.pos), "chain cooldown")
+
+
+func test_mage_bolts_can_ignite() -> void:
+	var sim := make_sim(1000, [], 1, ["banner", "tar"], "mage")
+	var e := sim.spawn_enemy("brute", false, 30.0, 0.0)
+	sim.step(DT)
+	var burned := false
+	for i in 20:
+		sim.hero.attack_cd = 0.0
+		var from := e.pos + Vector3(0, e.size, 8)
+		sim.hero_attack(from, (e.pos + Vector3(0, e.size, 0)) - from)
+		run(sim, 0.3)
+		if e.burn_t > 0.0:
+			burned = true
+			break
+	check(burned, "fire bolts ignite sometimes")
+	check(sim.stats.damage.has("hero"), "hero damage recorded")

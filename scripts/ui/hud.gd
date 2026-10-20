@@ -26,6 +26,7 @@ var _center_label: Label
 var _toasts: VBoxContainer
 var _hint: Label
 var _vignette: ColorRect
+var _objective: PanelContainer
 var _hurt := 0.0
 
 const VIGNETTE_SHADER := """
@@ -89,8 +90,13 @@ func _build() -> void:
 	tc.add_child(_title)
 	_wave_label = UITheme.label("", "", HORIZONTAL_ALIGNMENT_CENTER)
 	tc.add_child(_wave_label)
+	for l: Label in [_title, _wave_label]:
+		l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		l.add_theme_constant_override("outline_size", 6)
 	_status = UITheme.label("", "", HORIZONTAL_ALIGNMENT_CENTER)
 	_status.add_theme_color_override("font_color", UITheme.GOLD)
+	_status.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_status.add_theme_constant_override("outline_size", 6)
 	tc.add_child(_status)
 	_boss_box = VBoxContainer.new()
 	_boss_box.visible = false
@@ -126,7 +132,11 @@ func _build() -> void:
 	bc.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	bc.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bc.position.y -= 20
-	_hint = UITheme.label("", "Dim", HORIZONTAL_ALIGNMENT_CENTER)
+	_hint = UITheme.label("", "", HORIZONTAL_ALIGNMENT_CENTER)
+	_hint.add_theme_font_size_override("font_size", 19)
+	_hint.add_theme_color_override("font_color", Color(0.93, 0.92, 0.88))
+	_hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_hint.add_theme_constant_override("outline_size", 6)
 	bc.add_child(_hint)
 	_hotbar = HBoxContainer.new()
 	_hotbar.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -171,6 +181,22 @@ func _build() -> void:
 	_info.add_child(_info_text)
 	_info.visible = false
 
+	# Left: tutorial objective.
+	_objective = _panel(self, Control.PRESET_CENTER_LEFT, Vector2(20, -60))
+	_objective.custom_minimum_size = Vector2(360, 0)
+	var ov := VBoxContainer.new()
+	_objective.add_child(ov)
+	var ot := UITheme.label("", "Small")
+	ot.add_theme_color_override("font_color", UITheme.GOLD)
+	ov.add_child(ot)
+	var ob := UITheme.label("")
+	ob.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ob.custom_minimum_size = Vector2(340, 0)
+	ov.add_child(ob)
+	_objective.set_meta("title", ot)
+	_objective.set_meta("body", ob)
+	_objective.visible = false
+
 	# Crosshair and centre messages.
 	_crosshair = Crosshair.new()
 	add_child(_crosshair)
@@ -180,6 +206,13 @@ func _build() -> void:
 	_center_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_center_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_center_label.position.y += 70
+
+
+## Tutorial objective card (hidden when `body` is empty).
+func set_objective(title: String, body: String) -> void:
+	_objective.visible = body != ""
+	(_objective.get_meta("title") as Label).text = title
+	(_objective.get_meta("body") as Label).text = body
 
 
 ## Pulses the damage vignette; `ratio` is the hit size relative to max health.
@@ -300,7 +333,7 @@ func _refresh_hotbar(sim: BattleSim, build: BuildController) -> void:
 
 func _refresh_hero(sim: BattleSim) -> void:
 	var h := sim.hero
-	_hero_label.text = "%s  %s %d" % [tr("H_RANGER"), tr("HUD_LEVEL"), h.level]
+	_hero_label.text = "%s  %s %d" % [tr(h.def.name_key), tr("HUD_LEVEL"), h.level]
 	_hero_bar.max_value = h.max_hp
 	_hero_bar.value = h.hp
 	var nxt := sim.xp_to_next()
@@ -309,9 +342,9 @@ func _refresh_hero(sim: BattleSim) -> void:
 	_xp_bar.max_value = 1.0
 	_xp_bar.value = 1.0 if nxt < 0.0 else clampf((h.xp - prev) / maxf(1.0, nxt - prev), 0.0, 1.0)
 	var cds := {
-		"attack": [h.attack_cd, float(h.def.attack.interval), "AB_ATTACK"],
-		"ability_1": [h.rain_cd, sim._cd(float(h.def.rain.cooldown)), "AB_RAIN"],
-		"ability_2": [h.blast_cd, sim._cd(float(h.def.blast.cooldown)), "AB_BLAST"],
+		"attack": [h.attack_cd, float(h.def.attack.interval), "AB_SWING" if h.def.attack.get("melee", false) else ("AB_CAST" if h.def.attack.has("style") else "AB_ATTACK")],
+		"ability_1": [h.rain_cd, sim.ability_cooldown(0), "AB_" + sim.ability_id(0).to_upper()],
+		"ability_2": [h.blast_cd, sim.ability_cooldown(1), "AB_" + sim.ability_id(1).to_upper()],
 		"dodge": [h.dodge_cd, float(h.def.dodge.cooldown), "AB_DODGE"],
 	}
 	for k in cds:
@@ -331,7 +364,7 @@ func _refresh_info(sim: BattleSim, build: BuildController) -> void:
 		txt = "[b][color=#f2c14e]%s[/color][/b]  ◆ %d\n%s" % [Texts.structure_name(build.selected), sim.structure_cost(build.selected), tr(def.desc_key)]
 		if not build.last_check.is_empty() and not build.last_check.ok:
 			txt += "\n[color=#ff5a4f]%s[/color]" % tr(build.last_check.reason)
-		txt += "\n[color=#9a9fb0]%s[/color]" % (tr("HUD_PLACE_HINT") % [Settings.action_label("attack"), "RMB"])
+		txt += "\n[color=#9a9fb0]%s[/color]" % (tr("HUD_PLACE_HINT") % [Settings.action_label("attack"), Settings.action_label("cancel")])
 	elif build.hovered:
 		var st := build.hovered
 		txt = "[b][color=#f2c14e]%s[/color][/b]  %s %d\n" % [Texts.structure_name(st.type), tr("HUD_LEVEL"), st.level]

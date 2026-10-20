@@ -157,3 +157,36 @@ func test_snapshot_restore_keeps_defences() -> void:
 	check_eq(sim2.structures.size(), 2)
 	check_eq(sim2.structures[0].level, 2)
 	check_eq(sim2.structures[0].invested, st.invested)
+
+
+func test_all_maps_are_valid() -> void:
+	for f in DirAccess.get_files_at("res://data/maps"):
+		if not f.ends_with(".json"):
+			continue
+		var m := MapDef.from_dict(DataDB.map(f.get_basename()))
+		var half := m.path_width * 0.5
+		for i in m.path.points.size():
+			check(m.bounds.grow(0.01).has_point(m.path.points[i]), "%s: road point %d inside bounds" % [m.id, i])
+		check(m.path.points[-1].distance_to(m.core_pos) < 3.0, "%s: road ends at the core" % m.id)
+		for o in m.obstacles:
+			check(m.path.distance_to(o.pos) > half + float(o.radius), "%s: obstacle at %s blocks the road" % [m.id, o.pos])
+			check(m.bounds.has_point(o.pos), "%s: obstacle %s inside bounds" % [m.id, o.pos])
+		for w in m.walls:
+			var r: Rect2 = w.rect
+			for p in [r.position, r.end, Vector2(r.position.x, r.end.y), Vector2(r.end.x, r.position.y), r.get_center()]:
+				check(m.path.distance_to(p) > half + 0.5, "%s: wall %s touches the road" % [m.id, r])
+		for pl in m.plateaus:
+			var r: Rect2 = pl.rect
+			for s in range(0, int(m.path.length), 1):
+				check(not r.grow(half).has_point(m.path.sample(s)), "%s: plateau %s overlaps the road" % [m.id, r])
+				if r.grow(half).has_point(m.path.sample(s)):
+					break
+		check(not m.circle_hits_obstacle(m.hero_spawn, 0.5), "%s: hero spawn is free" % m.id)
+		# Parallel stretches of road keep room for towers between them.
+		var pts := m.path.points
+		for s in range(0, int(m.path.length), 2):
+			var p := m.path.sample(s)
+			for t in range(0, int(m.path.length), 2):
+				if absf(t - s) > 14.0:
+					check(p.distance_to(m.path.sample(t)) > m.path_width + 3.0, "%s: road loops too close at s=%d/%d" % [m.id, s, t])
+		check(pts.size() > 3)

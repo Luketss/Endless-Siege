@@ -410,6 +410,7 @@ func _update_status(e: Units.Enemy, dt: float) -> void:
 	else:
 		e.chill_accum = 0.0
 	e.frozen_t = maxf(0.0, e.frozen_t - dt)
+	e.stun_t = maxf(0.0, e.stun_t - dt)
 	e.oiled_t = maxf(0.0, e.oiled_t - dt)
 	if e.burn_t > 0.0:
 		e.burn_t -= dt
@@ -427,7 +428,7 @@ func _move(e: Units.Enemy, dt: float) -> void:
 	var spd := e.speed
 	if e.boss:
 		spd *= float(_boss_phase_def(e).get("speed_mult", 1.0))
-	if e.frozen_t > 0.0:
+	if e.frozen_t > 0.0 or e.stun_t > 0.0:
 		spd = 0.0
 	elif e.chill_t > 0.0:
 		spd *= 1.0 - e.chill_slow
@@ -704,7 +705,7 @@ func _fire(st: Units.Structure, target: Units.Enemy) -> void:
 
 
 func _predict(e: Units.Enemy, t: float) -> Vector3:
-	if e.flying or e.frozen_t > 0.0 or e.launched_t > 0.0:
+	if e.flying or e.frozen_t > 0.0 or e.stun_t > 0.0 or e.launched_t > 0.0:
 		return e.pos
 	var spd := e.speed * ((1.0 - e.chill_slow) if e.chill_t > 0.0 else 1.0)
 	var p := map.path.sample(e.s + spd * t)
@@ -878,6 +879,8 @@ func _move_linear(p: Units.Projectile, dt: float) -> void:
 			continue
 		p.hit_ids.append(e.id)
 		var dealt := damage_enemy(e, p.damage, p.dtype, p.source, p.crit_chance)
+		if p.ignite > 0.0 and e.alive and rng.randf() < p.ignite:
+			_ignite(e, p.source)
 		if dealt < 0.0 and p.bounces < int(mods.flag("ricochet")):
 			_ricochet(p, e)
 		if p.pierce > 0:
@@ -982,13 +985,17 @@ func hero_attack(origin: Vector3, dir: Vector3) -> bool:
 		return false
 	var a: Dictionary = hero.def.attack
 	hero.attack_cd = float(a.interval)
+	if a.get("melee", false):
+		_hero_swing(origin, dir, a)
+		return true
 	var p := Units.Projectile.new()
 	p.id = _id()
-	p.style = "hero_arrow"
+	p.style = a.get("style", "hero_arrow")
 	p.source = HERO
 	p.speed = float(a.speed)
 	p.damage = hero_damage()
-	p.dtype = "physical"
+	p.dtype = a.get("dtype", "physical")
+	p.ignite = float(a.get("ignite", 0.0))
 	p.crit_chance = _hero_crit()
 	p.pos = origin
 	p.dir = dir.normalized()
@@ -999,8 +1006,33 @@ func hero_attack(origin: Vector3, dir: Vector3) -> bool:
 	return true
 
 
+## Melee arc in front of the hero; hits every ground enemy inside it.
+func _hero_swing(origin: Vector3, dir: Vector3, a: Dictionary) -> void:
+	var f2 := Vector2(dir.x, dir.z).normalized()
+	var o2 := Vector2(origin.x, origin.z)
+	var half := deg_to_rad(float(a.angle) * 0.5)
+	var hits := 0
+	for e: Units.Enemy in enemies_near(origin, float(a.range), false, true):
+		var to := Vector2(e.pos.x, e.pos.z) - o2
+		if to.length() > e.size + 0.6 and absf(f2.angle_to(to)) > half:
+			continue
+		damage_enemy(e, hero_damage(), "physical", HERO, _hero_crit())
+		hits += 1
+	emit({"type": "hero_swing", "pos": origin, "dir": dir, "hits": hits})
+
+
+## Ability ids of the current hero, e.g. ["rain", "blast"] or ["slam", "charge"].
+func ability_id(slot: int) -> String:
+	var list: Array = hero.def.get("abilities", ["rain", "blast"])
+	return list[slot]
+
+
+func ability_cooldown(slot: int) -> float:
+	return _cd(float(hero.def[ability_id(slot)].cooldown))
+
+
 func hero_rain(point: Vector3) -> bool:
-	if not hero.alive or hero.rain_cd > 0.0:
+	if not hero.alive or hero.rain_cd > 0.0 or not hero.def.has("rain"):
 		return false
 	var r: Dictionary = hero.def.rain
 	hero.rain_cd = _cd(float(r.cooldown))
@@ -1011,7 +1043,7 @@ func hero_rain(point: Vector3) -> bool:
 
 
 func hero_blast(origin: Vector3, forward: Vector3) -> bool:
-	if not hero.alive or hero.blast_cd > 0.0:
+	if not hero.alive or hero.blast_cd > 0.0 or not hero.def.has("blast"):
 		return false
 	var b: Dictionary = hero.def.blast
 	hero.blast_cd = _cd(float(b.cooldown))
@@ -1027,6 +1059,108 @@ func hero_blast(origin: Vector3, forward: Vector3) -> bool:
 		if e.alive:
 			launch(e, float(b.push), HERO)
 	emit({"type": "ability", "name": "blast", "pos": origin, "dir": forward})
+	return true
+
+
+func _hero_scale() -> float:
+	return 1.0 + mods.stat("hero_damage_pct") + float(hero.def.level_bonus.damage) * (hero.level - 1)
+
+
+## Mage Q: frost nova at the crosshair. Chills everything inside (air too) and
+## freezes non-boss enemies briefly, so ice synergies (shatter, deep freeze) apply.
+func hero_nova(point: Vector3) -> bool:
+	if not hero.alive or hero.rain_cd > 0.0 or not hero.def.has("nova"):
+		return false
+	var n: Dictionary = hero.def.nova
+	hero.rain_cd = _cd(float(n.cooldown))
+	for e: Units.Enemy in enemies_near(point, float(n.radius)):
+		damage_enemy(e, float(n.damage) * _hero_scale(), "ice", HERO, _hero_crit())
+		if not e.alive:
+			continue
+		_chill(e, {"slow": float(n.slow), "duration": float(n.chill)})
+		if not e.boss:
+			e.frozen_t = maxf(e.frozen_t, float(n.freeze))
+	emit({"type": "ability", "name": "nova", "pos": point, "radius": float(n.radius)})
+	return true
+
+
+## Mage E: chain lightning from the hero to the enemy nearest `aim`, then jumping to
+## the closest unhit enemy each time. Lightning already deals bonus damage to chilled.
+func hero_chain(origin: Vector3, aim: Vector3) -> bool:
+	if not hero.alive or hero.blast_cd > 0.0 or not hero.def.has("chain"):
+		return false
+	var c: Dictionary = hero.def.chain
+	var first: Units.Enemy = null
+	var best := INF
+	for e: Units.Enemy in enemies_near(origin, float(c.range)):
+		var d := Vector2(e.pos.x, e.pos.z).distance_to(Vector2(aim.x, aim.z))
+		if d < best:
+			best = d
+			first = e
+	if first == null:
+		return false
+	hero.blast_cd = _cd(float(c.cooldown))
+	var dmg := float(c.damage) * _hero_scale()
+	var hit: Array[int] = []
+	var from := origin
+	var cur := first
+	while cur != null and hit.size() < int(c.targets):
+		hit.append(cur.id)
+		emit({"type": "arc", "from": from, "to": cur.pos + Vector3(0, cur.size, 0)})
+		from = cur.pos + Vector3(0, cur.size, 0)
+		var at := cur.pos
+		damage_enemy(cur, dmg, "lightning", HERO, _hero_crit())
+		dmg *= float(c.falloff)
+		var nxt: Units.Enemy = null
+		var nd := INF
+		for o: Units.Enemy in enemies_near(at, float(c.bounce_range)):
+			if hit.has(o.id) or not o.alive:
+				continue
+			var d := o.pos.distance_to(at)
+			if d < nd:
+				nd = d
+				nxt = o
+		cur = nxt
+	emit({"type": "ability", "name": "chain", "pos": origin})
+	return true
+
+
+## Warrior Q: ground slam around the hero, damages and stuns (air included).
+func hero_slam() -> bool:
+	if not hero.alive or hero.rain_cd > 0.0 or not hero.def.has("slam"):
+		return false
+	var s: Dictionary = hero.def.slam
+	hero.rain_cd = _cd(float(s.cooldown))
+	var dmg := float(s.damage) * (1.0 + mods.stat("hero_damage_pct") + float(hero.def.level_bonus.damage) * (hero.level - 1))
+	for e: Units.Enemy in enemies_near(hero.pos, float(s.radius)):
+		damage_enemy(e, dmg, "physical", HERO, _hero_crit())
+		if e.alive and not e.boss:
+			e.stun_t = maxf(e.stun_t, float(s.stun))
+	emit({"type": "ability", "name": "slam", "pos": hero.pos, "radius": float(s.radius)})
+	return true
+
+
+## Warrior E: shield charge. The controller moves the hero; here every ground enemy in
+## the lane ahead is hit and knocked back down the road. Invulnerable while charging.
+func hero_charge(forward: Vector3) -> bool:
+	if not hero.alive or hero.blast_cd > 0.0 or not hero.def.has("charge"):
+		return false
+	var c: Dictionary = hero.def.charge
+	hero.blast_cd = _cd(float(c.cooldown))
+	hero.invuln_t = maxf(hero.invuln_t, float(c.duration) + 0.1)
+	var f2 := Vector2(forward.x, forward.z).normalized()
+	var o2 := Vector2(hero.pos.x, hero.pos.z)
+	var dist := float(c.distance)
+	var dmg := float(c.damage) * (1.0 + mods.stat("hero_damage_pct"))
+	for e: Units.Enemy in enemies_near(hero.pos + Vector3(f2.x, 0, f2.y) * dist * 0.5, dist * 0.5 + float(c.width), false, true):
+		var to := Vector2(e.pos.x, e.pos.z) - o2
+		var along := to.dot(f2)
+		if along < -0.5 or along > dist + 0.5 or absf(to.cross(f2)) > float(c.width) * 0.5 + e.size:
+			continue
+		damage_enemy(e, dmg, "physical", HERO, _hero_crit())
+		if e.alive:
+			launch(e, float(c.push), HERO)
+	emit({"type": "ability", "name": "charge", "pos": hero.pos, "dir": forward})
 	return true
 
 
@@ -1106,7 +1240,7 @@ func _update_hero(dt: float) -> void:
 		var contact := float(e.def.get("contact", 0))
 		if contact <= 0.0 or e.contact_cd > 0.0 or e.launched_t > 0.0:
 			continue
-		if e.attack_t <= 0.0 and e.frozen_t <= 0.0 and _hero_dist(e) <= e.size + 0.6:
+		if e.attack_t <= 0.0 and e.frozen_t <= 0.0 and e.stun_t <= 0.0 and _hero_dist(e) <= e.size + 0.6:
 			e.attack_t = ATTACK_WINDUP
 			emit({"type": "enemy_attack", "id": e.id, "pos": e.pos})
 
@@ -1118,7 +1252,7 @@ func _hero_dist(e: Units.Enemy) -> float:
 ## Melee windup: the hit lands only if the hero is still in reach when it ends,
 ## so stepping away or dodging during the telegraph avoids the damage.
 func _resolve_attack(e: Units.Enemy, dt: float) -> void:
-	if e.frozen_t > 0.0 or e.launched_t > 0.0:
+	if e.frozen_t > 0.0 or e.launched_t > 0.0 or e.stun_t > 0.0:
 		e.attack_t = 0.0
 		e.contact_cd = 0.5
 		return
