@@ -133,7 +133,9 @@ func _update_ghost(hit: Variant) -> void:
 
 func _tint(node: Node, m: Material) -> void:
 	for c in node.get_children():
-		if c is MeshInstance3D and c != _range:
+		if c is MeshInstance3D and c.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+			c.visible = false  # shadow proxy: the ghost casts no shadow
+		elif c is MeshInstance3D and c != _range:
 			c.material_override = m
 			c.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_tint(c, m)

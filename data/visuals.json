@@ -1,0 +1,58 @@
+{
+	"enemies": {
+		"grunt":     { "scene": "res://assets/models/quaternius/monsters/Skeleton.fbx", "scale": 0.27, "bar_y": 1.9, "rot_y": 180,
+			"anims": { "move": "SkeletonArmature|Skeleton_Running", "death": "SkeletonArmature|Skeleton_Death", "attack": "SkeletonArmature|Skeleton_Attack" } },
+		"runner":    { "scene": "res://assets/models/quaternius/cute/GreenDemon.fbx", "texture": "res://assets/models/quaternius/cute/GreenDemon_Texture.png", "scale": 0.7, "bar_y": 1.6, "rot_y": 180,
+			"anims": { "move": "MonsterArmature|Walk", "death": "MonsterArmature|Death", "attack": "MonsterArmature|Bite_InPlace" }, "anim_speed": 1.8 },
+		"brute":     { "scene": "res://assets/models/quaternius/knight/KnightCharacter.fbx", "scale": 0.42, "bar_y": 3.0, "rot_y": 180,
+			"anims": { "move": "HumanArmature|Walking", "death": "HumanArmature|Death", "attack": "HumanArmature|Run_swordAttack" } },
+		"wisp":      { "scene": "res://assets/models/quaternius/monsters/Bat.fbx", "scale": 0.3, "rot_y": 180, "y": 0.3, "bar_y": 2.0,
+			"anims": { "move": "BatArmature|Bat_Flying", "death": "BatArmature|Bat_Death", "attack": "BatArmature|Bat_Attack" } },
+		"splitter":  { "scene": "res://assets/models/quaternius/monsters/Slime.fbx", "scale": 0.55, "bar_y": 1.6, "rot_y": 180,
+			"anims": { "move": "Armature|Slime_Walk", "death": "Armature|Slime_Death", "attack": "Armature|Slime_Attack" } },
+		"splitling": { "scene": "res://assets/models/quaternius/monsters/Slime.fbx", "scale": 0.28, "bar_y": 1.0, "rot_y": 180,
+			"anims": { "move": "Armature|Slime_Walk", "death": "Armature|Slime_Death", "attack": "Armature|Slime_Attack" }, "anim_speed": 1.5 },
+		"hexer":     { "scene": "res://assets/models/quaternius/rpg/Cleric.fbx", "scale": 0.55, "bar_y": 2.4, "rot_y": 180,
+			"textures": { "Cleric_Staff": "res://assets/models/quaternius/rpg/Cleric_Staff_Texture.png", "*": "res://assets/models/quaternius/rpg/Cleric_Texture.png" },
+			"anims": { "move": "CharacterArmature|Walk", "death": "CharacterArmature|Death", "attack": "CharacterArmature|Spell1" } },
+		"warden":    { "scene": "res://assets/models/quaternius/cute/Tree.fbx", "texture": "res://assets/models/quaternius/cute/Tree_Texture.png", "scale": 0.75, "bar_y": 2.6, "rot_y": 180,
+			"anims": { "move": "MonsterArmature|Walk", "death": "MonsterArmature|Death", "attack": "MonsterArmature|Bite_Front" } },
+		"golem":     { "scene": "res://assets/models/quaternius/monsters/Dragon.fbx", "scale": 1.2, "rot_y": 180, "y": 0.6, "bar_y": 6.5,
+			"anims": { "move": "DragonArmature|Dragon_Flying", "death": "DragonArmature|Dragon_Death", "attack": "DragonArmature|Dragon_Attack" } }
+	},
+	"hero": {
+		"scene": "res://assets/models/quaternius/rpg/Ranger.fbx", "scale": 0.55, "rot_y": 180,
+		"textures": { "Ranger_Bow": "res://assets/models/quaternius/rpg/Ranger_Bow_Texture.png", "*": "res://assets/models/quaternius/rpg/Ranger_Texture.png" },
+		"anims": { "idle": "CharacterArmature|Idle_Weapon", "run": "CharacterArmature|Run", "shoot": "CharacterArmature|Bow_Attack_Shoot",
+			"roll": "CharacterArmature|Roll", "death": "CharacterArmature|Death", "cast": "CharacterArmature|Bow_Attack_Draw" }
+	},
+	"structures": {
+		"arrow":  { "scale": 2.0, "stack": ["res://assets/models/kenney_td/tower-square-bottom-a.glb", "res://assets/models/kenney_td/tower-square-middle-a.glb", "res://assets/models/kenney_td/tower-square-top-a.glb"],
+			"head": "res://assets/models/kenney_td/weapon-ballista.glb", "head_rot_y": 180 },
+		"cannon": { "scale": 2.1, "stack": ["res://assets/models/kenney_td/tower-round-bottom-a.glb", "res://assets/models/kenney_td/tower-round-top-a.glb"],
+			"head": "res://assets/models/kenney_td/weapon-cannon.glb", "head_rot_y": 180 },
+		"frost":  { "scale": 2.0, "stack": ["res://assets/models/kenney_td/tower-round-base.glb", "res://assets/models/kenney_td/tower-round-bottom-a.glb", "res://assets/models/kenney_td/tower-round-crystals.glb"],
+			"tint": "9fe6ff", "spin": "crystal" },
+		"banner": { "scale": 1.8, "stack": ["res://assets/models/kenney_castle/tower-hexagon-base.glb", "res://assets/models/kenney_castle/tower-hexagon-top.glb", "res://assets/models/kenney_castle/flag-banner-long.glb"] }
+	},
+	"projectiles": {
+		"arrow":     { "scene": "res://assets/models/kenney_td/weapon-ammo-arrow.glb", "scale": 1.4, "rot_y": 0 },
+		"ballistic": { "scene": "res://assets/models/kenney_td/weapon-ammo-cannonball.glb", "scale": 2.2, "rot_y": 0 }
+	},
+	"environment": {
+		"trees": ["res://assets/models/kenney_nature/tree_pineDefaultA.glb", "res://assets/models/kenney_nature/tree_pineRoundA.glb",
+			"res://assets/models/kenney_nature/tree_pineTallA.glb", "res://assets/models/kenney_nature/tree_default_dark.glb",
+			"res://assets/models/kenney_nature/tree_oak_dark.glb", "res://assets/models/kenney_nature/tree_detailed_dark.glb"],
+		"tree_scale": 3.6,
+		"tall_obstacle": ["res://assets/models/kenney_nature/rock_tallA.glb", "res://assets/models/kenney_nature/rock_tallB.glb", "res://assets/models/kenney_nature/stone_tallA.glb"],
+		"short_obstacle": ["res://assets/models/kenney_nature/rock_largeA.glb", "res://assets/models/kenney_nature/rock_largeB.glb", "res://assets/models/kenney_nature/stone_largeA.glb"],
+		"wall": "res://assets/models/kenney_castle/wall.glb",
+		"wall_pillar": "res://assets/models/kenney_castle/wall-pillar.glb",
+		"wall_scale": 2.4,
+		"decor": ["res://assets/models/kenney_nature/grass.glb", "res://assets/models/kenney_nature/grass_large.glb", "res://assets/models/kenney_nature/plant_bush.glb",
+			"res://assets/models/kenney_nature/mushroom_red.glb", "res://assets/models/kenney_nature/mushroom_redGroup.glb", "res://assets/models/kenney_nature/flower_purpleA.glb",
+			"res://assets/models/kenney_nature/rock_smallA.glb", "res://assets/models/kenney_nature/stump_old.glb", "res://assets/models/kenney_nature/log.glb",
+			"res://assets/models/kenney_td/detail-crystal.glb"],
+		"decor_scale": 2.6
+	}
+}

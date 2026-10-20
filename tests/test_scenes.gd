@@ -95,14 +95,11 @@ func test_hero_and_build_input() -> void:
 	await _physics(30)
 	Input.action_release("move_forward")
 	check(g.hero.global_position.distance_to(start) > 1.0, "WASD moves the hero (%.2f m)" % g.hero.global_position.distance_to(start))
-	var shots: int = 0
 	Input.action_press("attack")
-	await _physics(5)
+	await _physics(3)
 	Input.action_release("attack")
-	for p in g.sim.projectiles:
-		if p.source == BattleSim.HERO:
-			shots += 1
-	check(shots >= 1, "attack fires arrows")
+	# A fired shot starts the attack cooldown (the arrow itself may already have landed).
+	check(g.sim.hero.attack_cd > 0.0, "attack fires arrows")
 	Input.action_press("dodge")
 	await _physics(2)
 	Input.action_release("dodge")

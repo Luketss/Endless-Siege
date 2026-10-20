@@ -45,7 +45,7 @@ S = {
  # ---- enemies
  "E_GRUNT": ("Grunt", "Brutamonte"), "E_RUNNER": ("Runner", "Corredor"), "E_BRUTE": ("Armored Brute", "Bruto Blindado"),
  "E_WISP": ("Wisp", "Fogo-fátuo"), "E_SPLITTER": ("Splitter", "Divisor"), "E_SPLITLING": ("Splitling", "Fragmento"),
- "E_HEXER": ("Hexer", "Feiticeiro"), "E_WARDEN": ("Warden", "Guardião"), "E_GOLEM": ("Ancestral Golem", "Golem Ancestral"),
+ "E_HEXER": ("Hexer", "Feiticeiro"), "E_WARDEN": ("Warden", "Guardião"), "E_GOLEM": ("Ancestral Dragon", "Dragão Ancestral"),
  # ---- upgrades
  "RARITY_COMMON": ("Common", "Comum"), "RARITY_RARE": ("Rare", "Rara"), "RARITY_EPIC": ("Epic", "Épica"), "RARITY_LEGENDARY": ("Legendary", "Lendária"),
  "TAG_ARROW": ("Arrow", "Flecha"), "TAG_PHYSICAL": ("Physical", "Físico"), "TAG_CANNON": ("Cannon", "Canhão"), "TAG_ICE": ("Ice", "Gelo"),
@@ -96,7 +96,7 @@ S = {
  "REWARD_SUB": ("Upgrades last for the whole journey. Combine tags to unlock synergies.", "Melhorias duram a jornada inteira. Combine marcadores para ativar sinergias."),
  "REWARD_SKIP": ("Skip (+%d gold)", "Pular (+%d de ouro)"),
  # ---- journey / nodes
- "JOURNEY_TITLE": ("The Journey", "A Jornada"), "JOURNEY_SUB": ("Choose your next encounter. The siege ends at the Ancestral Golem.", "Escolha o próximo encontro. O cerco termina no Golem Ancestral."),
+ "JOURNEY_TITLE": ("The Journey", "A Jornada"), "JOURNEY_SUB": ("Choose your next encounter. The siege ends at the Ancestral Dragon.", "Escolha o próximo encontro. O cerco termina no Dragão Ancestral."),
  "JOURNEY_STATUS": ("Expedition", "Expedição"), "JOURNEY_SYNERGIES": ("Active synergies", "Sinergias ativas"), "JOURNEY_SAVE_QUIT": ("Save and quit to menu", "Salvar e voltar ao menu"),
  "NODE_COMBAT": ("Battle", "Batalha"), "NODE_ELITE": ("Elite", "Elite"), "NODE_SHOP": ("Merchant", "Mercador"),
  "NODE_EVENT": ("Event", "Evento"), "NODE_REST": ("Camp", "Acampamento"), "NODE_BOSS": ("Boss", "Chefe"),
@@ -105,7 +105,7 @@ S = {
  "NODE_SHOP_REWARD": ("Buy upgrades and repair the core", "Compre melhorias e repare o núcleo"),
  "NODE_EVENT_REWARD": ("Unknown: risk and reward", "Desconhecido: risco e recompensa"),
  "NODE_REST_REWARD": ("Repair 40% of the core", "Repara 40% do núcleo"),
- "NODE_BOSS_REWARD": ("Defeat the Ancestral Golem to win", "Derrote o Golem Ancestral para vencer"),
+ "NODE_BOSS_REWARD": ("Defeat the Ancestral Dragon to win", "Derrote o Dragão Ancestral para vencer"),
  "REST_TEXT": ("The camp is quiet. Your engineers can repair [b]%d[/b] core health.", "O acampamento está calmo. Seus engenheiros podem reparar [b]%d[/b] de vida do núcleo."),
  "REST_DO": ("Rest and repair", "Descansar e reparar"),
  "SHOP_REPAIR": ("Repair core +%d (◆ %d)", "Reparar núcleo +%d (◆ %d)"), "SHOP_OWNED": ("Owned", "Adquirida"),
@@ -133,7 +133,7 @@ S = {
  "HUD_PLACE_HINT": ("[%s] place · [%s] cancel", "[%s] posicionar · [%s] cancelar"),
  "HUD_WAVE_START": ("Wave %d!", "Onda %d!"), "HUD_WAVE_CLEARED": ("Wave cleared! +%d gold", "Onda vencida! +%d de ouro"),
  "HUD_CACHE_HINT": ("A supply cache appeared somewhere on the field!", "Suprimentos apareceram em algum lugar do campo!"),
- "HUD_BOSS_PHASE": ("The Golem enters phase %d!", "O Golem entra na fase %d!"), "HUD_LEVEL_UP": ("Level up! Level %d", "Subiu de nível! Nível %d"),
+ "HUD_BOSS_PHASE": ("The Dragon enters phase %d!", "O Dragão entra na fase %d!"), "HUD_LEVEL_UP": ("Level up! Level %d", "Subiu de nível! Nível %d"),
  "HUD_HERO_DOWN": ("Your hero has fallen!", "Seu herói caiu!"), "HUD_CORE_LOW": ("The core is in danger!", "O núcleo está em perigo!"),
  "HUD_CORE_DESTROYED": ("The core has been destroyed…", "O núcleo foi destruído…"),
  "ST_DAMAGE": ("Damage", "Dano"), "ST_RANGE": ("Range", "Alcance"), "ST_RATE": ("Rate", "Cadência"), "ST_TARGET": ("Targeting", "Alvo"),

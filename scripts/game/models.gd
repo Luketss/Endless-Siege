@@ -1,11 +1,31 @@
 class_name Models
 extends RefCounted
-## Builds the stylized models from primitives. Each model is a Node3D whose meta
-## "parts" holds named sub-nodes the view animates (head, barrel, crystal...).
-## Silhouettes are distinct per role so they read at a glance.
+## Builds the 3D models. Imported art (data/visuals.json, via `Assets`) is used when
+## available; otherwise stylized placeholders are built from primitives. Each model is a
+## Node3D whose meta "parts" holds named sub-nodes the view animates (head, crystal...).
+## Animated imported models also carry the meta set by `Assets.creature`.
 
 
 static func enemy(type: String, def: Dictionary, elite: bool) -> Node3D:
+	var imported := Assets.creature(DataDB.visuals().get("enemies", {}).get(type, {}))
+	if imported:
+		_decorate_elite(imported, float(def.get("size", 0.5)), elite)
+		imported.set_meta("parts", {})
+		imported.set_meta("base_color", Color(def.get("color", "888888")))
+		return imported
+	return _enemy_placeholder(type, def, elite)
+
+
+static func _decorate_elite(root: Node3D, s: float, elite: bool) -> void:
+	if not elite:
+		return
+	Art.part(root, Art.torus(s * 0.35, s * 0.5), Art.mat(Color("ffcf3a"), 2.5, 0.3), Vector3(0, s * 2.6 + 0.3, 0), Vector3.ZERO, Vector3.ONE, false)
+	var aura := Art.part(root, Art.sphere(s * 1.6), Art.mat(Color(1, 0.3, 0.2, 0.12), 1.0, 1.0, true, true), Vector3(0, s * 1.2, 0), Vector3.ZERO, Vector3.ONE, false)
+	aura.name = "elite_aura"
+	root.scale = Vector3.ONE * float(DataDB.balance().elite.scale)
+
+
+static func _enemy_placeholder(type: String, def: Dictionary, elite: bool) -> Node3D:
 	var root := Node3D.new()
 	var c := Color(def.get("color", "888888"))
 	var s := float(def.get("size", 0.5))
@@ -69,6 +89,47 @@ static func enemy(type: String, def: Dictionary, elite: bool) -> Node3D:
 
 
 static func structure(type: String, def: Dictionary) -> Node3D:
+	var cfg: Dictionary = DataDB.visuals().get("structures", {}).get(type, {})
+	if not cfg.is_empty():
+		var built := _imported_structure(cfg)
+		if built:
+			return built
+	return _structure_placeholder(type, def)
+
+
+static func _imported_structure(cfg: Dictionary) -> Node3D:
+	var sc := float(cfg.get("scale", 1.0))
+	var st := Assets.stack(cfg.get("stack", []), sc)
+	if st.is_empty():
+		return null
+	var root: Node3D = st.root
+	var parts := {}
+	if cfg.has("head"):
+		var head := Node3D.new()
+		head.position = Vector3(0, float(st.top), 0)
+		root.add_child(head)
+		var weapon := Assets.prop(cfg.head, sc, float(cfg.get("head_rot_y", 0.0)))
+		if weapon == null:
+			root.free()
+			return null
+		head.add_child(weapon)
+		Assets.no_self_shadow(weapon)
+		parts.head = head
+	if cfg.has("tint"):
+		Assets.tint(root, Color(cfg.tint))
+	if cfg.has("spin"):
+		var spin := root.find_child(cfg.spin, true, false) as Node3D
+		if spin:
+			parts.crystal = spin
+	var flag := root.find_child("flag*", true, false) as Node3D
+	if flag:
+		parts.flag = flag
+	root.set_meta("parts", parts)
+	root.set_meta("height", float(st.top))
+	return root
+
+
+static func _structure_placeholder(type: String, def: Dictionary) -> Node3D:
 	var root := Node3D.new()
 	var parts := {}
 	var c := Color(def.get("color", "999999"))
@@ -141,6 +202,15 @@ static func level_pips(parent: Node3D, level: int, height: float) -> Node3D:
 
 
 static func projectile(style: String) -> Node3D:
+	var cfg: Dictionary = DataDB.visuals().get("projectiles", {}).get(style, {})
+	if not cfg.is_empty():
+		var p := Assets.prop(cfg.scene, float(cfg.get("scale", 1.0)), float(cfg.get("rot_y", 0.0)))
+		if p:
+			var holder := Node3D.new()
+			holder.add_child(p)
+			for mi in Assets._meshes(p):
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			return holder
 	var root := Node3D.new()
 	match style:
 		"ballistic":
@@ -184,6 +254,10 @@ static func cache() -> Node3D:
 
 
 static func hero() -> Node3D:
+	var imported := Assets.creature(DataDB.visuals().get("hero", {}))
+	if imported:
+		imported.set_meta("parts", {})
+		return imported
 	var root := Node3D.new()
 	var parts := {}
 	var cloak := Art.mat(Art.PALETTE.hero)
