@@ -60,7 +60,7 @@ func _show(page: String) -> void:
 		_pages[k].visible = k == page
 
 
-func _left_column() -> VBoxContainer:
+func _left_column() -> Control:
 	var m := MarginContainer.new()
 	UITheme.full_rect(m)
 	m.add_theme_constant_override("margin_left", 110)
