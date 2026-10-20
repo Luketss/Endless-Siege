@@ -194,3 +194,31 @@ func test_stepping_away_avoids_enemy_attack() -> void:
 	run(sim, 0.6)
 	check_eq(sim.hero.hp, sim.hero.max_hp, "out of reach when the windup ends")
 	check(e.contact_cd > 0.0, "attack spent")
+
+
+func test_tutorial_advances_on_actions() -> void:
+	var sim := make_sim()
+	var tut := Tutorial.new(Vector3.ZERO)
+	var ctx := {"hero_pos": Vector3.ZERO, "sim": sim, "selected": "", "phase": "build", "dt": 0.1}
+	check(not tut.update(ctx) and tut.step == 0, "waits until the hero moves")
+	check(tut.text() != "", "objective text")
+	ctx.hero_pos = Vector3(5, 0, 0)
+	check(tut.update(ctx) and tut.step == 1, "move done")
+	sim.hero.pos = Vector3(0, 0, 20)
+	sim.hero_attack(sim.hero.pos, Vector3.FORWARD)
+	tut.update(ctx)
+	ctx.selected = "arrow"
+	tut.update(ctx)
+	check_eq(tut.step, 3, "shoot and pick done")
+	var p := sim.map.path.sample(30.0)
+	var t := sim.map.path.tangent(30.0)
+	check(sim.build("arrow", p + Vector2(-t.y, t.x) * 4.6) != null or sim.build("arrow", p - Vector2(-t.y, t.x) * 4.6) != null, "built")
+	tut.update(ctx)
+	sim.hero_rain(Vector3(0, 0, 10))
+	tut.update(ctx)
+	ctx.phase = "wave"
+	tut.update(ctx)
+	check_eq(tut.step, 6, "place, ability and wave done")
+	for i in 80:
+		tut.update(ctx)
+	check(tut.done(), "core reminder times out")

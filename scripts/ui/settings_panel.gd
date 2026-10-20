@@ -143,6 +143,13 @@ func _game_tab() -> Control:
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size = Vector2(800, 0)
 	v.add_child(hint)
+	var replay := UITheme.button(tr("SET_TUTORIAL"))
+	replay.pressed.connect(func():
+		Profile.data.seen_tutorial = false
+		Profile.save()
+		replay.text = tr("SET_TUTORIAL_DONE")
+		replay.disabled = true)
+	v.add_child(replay)
 	return v
 
 

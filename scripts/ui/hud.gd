@@ -26,6 +26,7 @@ var _center_label: Label
 var _toasts: VBoxContainer
 var _hint: Label
 var _vignette: ColorRect
+var _objective: PanelContainer
 var _hurt := 0.0
 
 const VIGNETTE_SHADER := """
@@ -175,6 +176,22 @@ func _build() -> void:
 	_info.add_child(_info_text)
 	_info.visible = false
 
+	# Left: tutorial objective.
+	_objective = _panel(self, Control.PRESET_CENTER_LEFT, Vector2(20, -60))
+	_objective.custom_minimum_size = Vector2(360, 0)
+	var ov := VBoxContainer.new()
+	_objective.add_child(ov)
+	var ot := UITheme.label("", "Small")
+	ot.add_theme_color_override("font_color", UITheme.GOLD)
+	ov.add_child(ot)
+	var ob := UITheme.label("")
+	ob.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ob.custom_minimum_size = Vector2(340, 0)
+	ov.add_child(ob)
+	_objective.set_meta("title", ot)
+	_objective.set_meta("body", ob)
+	_objective.visible = false
+
 	# Crosshair and centre messages.
 	_crosshair = Crosshair.new()
 	add_child(_crosshair)
@@ -184,6 +201,13 @@ func _build() -> void:
 	_center_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_center_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_center_label.position.y += 70
+
+
+## Tutorial objective card (hidden when `body` is empty).
+func set_objective(title: String, body: String) -> void:
+	_objective.visible = body != ""
+	(_objective.get_meta("title") as Label).text = title
+	(_objective.get_meta("body") as Label).text = body
 
 
 ## Pulses the damage vignette; `ratio` is the hit size relative to max health.

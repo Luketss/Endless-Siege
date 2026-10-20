@@ -25,7 +25,7 @@ var speed_index := 0
 var _acc := 0.0
 var _hitstop := 0.0
 var _paused := false
-var _tutorial_step := -1
+var tutorial: Tutorial
 
 
 func _ready() -> void:
@@ -199,25 +199,21 @@ func _start_encounter() -> void:
 	Music.set_intensity(0.15)
 	hud.toast(Texts.node_name(node.type), UITheme.NODE_COLORS[node.type])
 	if not bool(Profile.data.get("seen_tutorial", false)):
-		_tutorial_step = 0
-		_tutorial()
+		tutorial = Tutorial.new(hero.global_position)
 
 
-func _tutorial() -> void:
-	var steps := ["TUT_1", "TUT_2", "TUT_3", "TUT_4"]
-	if _tutorial_step < 0 or _tutorial_step >= steps.size():
+func _update_tutorial(delta: float) -> void:
+	if tutorial == null:
+		return
+	if tutorial.update({"hero_pos": hero.global_position, "sim": sim, "selected": build.selected, "phase": phase, "dt": delta}):
+		Sfx.play("upgrade")
+	if tutorial.done():
+		tutorial = null
+		hud.set_objective("", "")
 		Profile.data.seen_tutorial = true
 		Profile.save()
-		_tutorial_step = -1
 		return
-	var text := tr(steps[_tutorial_step])
-	if _tutorial_step == 1:
-		text = text % Settings.action_label("slot_1")
-	elif _tutorial_step == 2:
-		text = text % Settings.action_label("start_wave")
-	hud.toast(text, UITheme.GOLD)
-	_tutorial_step += 1
-	get_tree().create_timer(3.2).timeout.connect(_tutorial)
+	hud.set_objective(tr("TUT_STEP") % [tutorial.step + 1, Tutorial.STEPS.size()], tutorial.text())
 
 
 func _process(delta: float) -> void:
@@ -237,6 +233,7 @@ func _process(delta: float) -> void:
 			steps += 1
 		for e in sim.pop_events():
 			_on_event(e)
+	_update_tutorial(delta)
 	hero.attack_blocked = build.is_building()
 	build.update(not _paused and phase != "done")
 	hud.refresh(sim, {"title": "%s · %s" % [Texts.node_name(node.get("type", "combat")), tr(map.name_key)],
