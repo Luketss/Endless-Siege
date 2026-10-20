@@ -1,7 +1,8 @@
 extends SceneTree
 ## Balance report: plays whole journeys with the scripted Autopilot (no hero actions).
 ##   godot --headless --path . --script res://tools/balance_sim.gd
-## Env: SIM_RUNS (default 12), SIM_MODS (comma separated challenge ids).
+## Env: SIM_RUNS (default 12), SIM_MODS (comma separated challenge ids),
+##      SIM_LOG (path: also write runs.jsonl records, readable by tools/run_report.py).
 ## The autopilot does not use the hero, so it is a "floor": a human should do better.
 
 
@@ -17,6 +18,8 @@ func _initialize() -> void:
 	var t0 := Time.get_ticks_msec()
 	for i in n:
 		var run := Autopilot.play_journey(1000 + i, ["banner", "tar", "legendary_pool"], mods)
+		if OS.get_environment("SIM_LOG") != "":
+			RunLog.append(run, OS.get_environment("SIM_LOG"))
 		if run.victory:
 			wins += 1
 			core_before_boss.append(run.core_hp)

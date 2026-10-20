@@ -288,6 +288,9 @@ SET_PRESS_KEY,Press a key…,Pressione uma tecla…
 SET_RESET_KEYS,Reset key bindings,Restaurar teclas padrão
 SET_LANGUAGE,Language,Idioma
 SET_DAMAGE_NUMBERS,Damage numbers,Números de dano
+SET_SCREEN_SHAKE,Screen shake,Tremor de tela
+SET_RUN_LOG,Save local play log,Salvar registro local de partidas
+SET_RUN_LOG_HINT,"Each finished journey is appended to %s (offline, never sent anywhere). Playtesters can share this file to help balance the game.","Cada jornada terminada é adicionada a %s (offline, nunca é enviado). Testadores podem compartilhar este arquivo para ajudar no balanceamento."
 ACTION_MOVE_FORWARD,Move forward,Mover para frente
 ACTION_MOVE_BACK,Move back,Mover para trás
 ACTION_MOVE_LEFT,Move left,Mover para a esquerda

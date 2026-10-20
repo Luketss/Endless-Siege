@@ -140,3 +140,57 @@ func test_full_journeys_finish() -> void:
 		check(run.finished, "journey %d finished" % seed_value)
 		outcomes.append("%s@%s(%dw)" % ["WIN" if run.victory else "LOSS", run.current_node, run.stats.waves])
 	print("    journeys: ", outcomes)
+
+
+func test_run_log_records_decisions() -> void:
+	var run := RunState.create(21, "ranger", [], [])
+	var node := RunFlow.enter(run, "0-0")
+	Autopilot.play_combat(run, node, Autopilot.new(21))
+	var picks := RunFlow.reward_choices(run, node)
+	RunFlow.record_reward(run, picks, picks[0])
+	var enc := run.history.filter(func(e): return e.t == "encounter")
+	check_eq(enc.size(), 1, "encounter logged")
+	check(enc[0].has("damage") and enc[0].has("core_after"), "encounter details")
+	var rew := run.history.filter(func(e): return e.t == "reward")
+	check(rew.size() == 1 and rew[0].picked == picks[0] and rew[0].offered.size() == 3, "reward offer and pick")
+	check(run.upgrades.has(picks[0]), "picked upgrade applied")
+	var copy := RunState.from_dict(JSON.parse_string(JSON.stringify(run.to_dict())))
+	check_eq(copy.history.size(), run.history.size(), "history survives save/load")
+	var path := "user://test_runs_%d.jsonl" % Time.get_ticks_usec()
+	check(RunLog.append(run, path))
+	check(RunLog.append(run, path))
+	var all := RunLog.read_all(path)
+	check_eq(all.size(), 2, "two journeys appended")
+	check_eq(all[0].seed, 21)
+	DirAccess.remove_absolute(path)
+
+
+func _attack_setup() -> Array:
+	var sim := make_sim()
+	var e := sim.spawn_enemy("brute", false, 20.0, 0.0)
+	sim.hero.pos = e.pos
+	sim.step(DT)
+	return [sim, e]
+
+
+func test_enemy_attack_has_windup() -> void:
+	var setup := _attack_setup()
+	var sim: BattleSim = setup[0]
+	var e: Units.Enemy = setup[1]
+	check(e.attack_t > 0.0, "windup started")
+	check(sim.events.any(func(ev): return ev.type == "enemy_attack"), "telegraph event")
+	check_eq(sim.hero.hp, sim.hero.max_hp, "no damage at windup start")
+	for i in 40:
+		sim.hero.pos = e.pos
+		sim.step(DT)
+	check(sim.hero.hp < sim.hero.max_hp, "hit lands after the windup")
+
+
+func test_stepping_away_avoids_enemy_attack() -> void:
+	var setup := _attack_setup()
+	var sim: BattleSim = setup[0]
+	var e: Units.Enemy = setup[1]
+	sim.hero.pos = e.pos + Vector3(6, 0, 0)
+	run(sim, 0.6)
+	check_eq(sim.hero.hp, sim.hero.max_hp, "out of reach when the windup ends")
+	check(e.contact_cd > 0.0, "attack spent")

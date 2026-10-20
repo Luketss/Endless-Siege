@@ -33,10 +33,12 @@ const DEFAULTS := {
 	"sfx_volume": 0.8,
 	"effects_quality": "high",  # high | low
 	"damage_numbers": true,
+	"screen_shake": true,
 	"shadows": true,
 	"mouse_sensitivity": 1.0,
 	"invert_y": false,
 	"language": "auto",
+	"run_log": true,
 	"bindings": {},
 }
 

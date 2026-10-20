@@ -25,3 +25,17 @@ A medição por encontro mostrou o problema da v1 a v3: as defesas **persistem**
 - O alvo inicial para a dificuldade padrão é um jogador médio vencer entre 30% e 50% das primeiras jornadas. O autopiloto sem herói em 25% é um piso razoável, mas **só testes com pessoas confirmam isso**.
 - O chefe é o principal muro. Se for frustrante, reduzir o dano ao núcleo quando ele vaza (45) ou a frequência das invocações.
 - Monitorar builds dominantes: rodar a simulação forçando conjuntos de melhorias (fácil de adicionar ao `Autopilot`) e comparar as taxas de vitória.
+
+## Registro de partidas reais
+
+Cada jornada terminada gera uma linha em `user://runs.jsonl`, com resultado, encontro final, melhorias oferecidas e escolhidas, compras, eventos, perda de núcleo, tempo e dano por fonte em cada encontro. O arquivo fica no PC do jogador, nunca é enviado, e pode ser desligado em Configurações → Jogo.
+
+- Windows: `%APPDATA%\Godot\app_userdata\Endless Siege\runs.jsonl`
+- Linux: `~/.local/share/godot/app_userdata/Endless Siege/runs.jsonl`
+
+```bash
+python3 tools/run_report.py runs_ana.jsonl runs_bruno.jsonl   # junta arquivos de vários testadores
+SIM_LOG=sim.jsonl godot --headless --path . --script res://tools/balance_sim.gd   # mesmo formato a partir da simulação
+```
+
+O relatório mostra a taxa de vitória, onde as derrotas acontecem, a taxa de escolha de cada melhoria (escolhida ÷ oferecida, útil para achar cartas fracas ou dominantes), a perda média de núcleo e o tempo por etapa, e a participação de cada fonte no dano.

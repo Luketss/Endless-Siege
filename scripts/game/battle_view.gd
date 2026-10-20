@@ -19,12 +19,16 @@ var _cache_node: Node3D
 var _time := 0.0
 var _dying: Array[Dictionary] = []
 var _hp_bar_mesh := QuadMesh.new()
+var _flash_mat := StandardMaterial3D.new()
 
 
 func _ready() -> void:
 	fx = FX.new()
 	add_child(fx)
 	_hp_bar_mesh.size = Vector2(1, 0.12)
+	_flash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_flash_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_flash_mat.albedo_color = Color(1, 1, 1, 0.65)
 
 
 func bind(p_sim: BattleSim) -> void:
@@ -145,6 +149,8 @@ func _animate_enemy(node: Node3D, e: Units.Enemy) -> void:
 		return
 	if e.frozen_t > 0.0 or e.launched_t > 0.0:
 		player.speed_scale = 0.0
+		return
+	if node.has_meta("attack_until") and _time < float(node.get_meta("attack_until")):
 		return
 	var factor := e.speed / maxf(0.1, float(e.def.speed))
 	if e.chill_t > 0.0:
@@ -407,6 +413,7 @@ func _animate_core() -> void:
 func handle_event(e: Dictionary) -> void:
 	match e.type:
 		"hit":
+			_hit_punch(e.id, e.crit or e.hero)
 			if e.crit:
 				fx.number(e.pos, "%d!" % int(e.amount), Color("ffd84a"), 72)
 				fx.sparks(e.pos + Vector3(0, 0.8, 0), Color("ffe08a"), 10, 6.0)
@@ -515,6 +522,56 @@ func handle_event(e: Dictionary) -> void:
 			Sfx.play("level_up")
 		"hero_hit":
 			Sfx.play("hurt", 0.2)
+		"enemy_attack":
+			var node: Node3D = _enemy_nodes.get(e.id)
+			if node:
+				var len := Assets.clip_length(node, "attack")
+				if len > 0.0 and Assets.play(node, "attack", maxf(1.0, len / 0.7), 0.08):
+					node.set_meta("attack_until", _time + 0.7)
+				else:
+					# Procedural models: lean back during the windup, then lunge.
+					var base := _base_scale(node)
+					var tw := create_tween()
+					tw.tween_property(node, "scale", base * Vector3(1.1, 0.85, 1.1), 0.3)
+					tw.tween_property(node, "scale", base, 0.15)
+			fx.ring(e.pos, 1.4, Color(1, 0.3, 0.2, 0.7), 0.4)
+
+
+## White flash plus a quick scale punch on the enemy that was hit.
+func _hit_punch(id: int, strong: bool) -> void:
+	var node: Node3D = _enemy_nodes.get(id)
+	if node == null or fx.low_quality:
+		return
+	if strong or not node.has_meta("punch_t") or _time - float(node.get_meta("punch_t")) > 0.15:
+		node.set_meta("punch_t", _time)
+		var base := _base_scale(node)
+		var k := 1.18 if strong else 1.08
+		var tw := create_tween()
+		tw.tween_property(node, "scale", base * Vector3(k, 1.0 / k, k), 0.04)
+		tw.tween_property(node, "scale", base, 0.12)
+		_flash(node)
+
+
+func _base_scale(node: Node3D) -> Vector3:
+	if not node.has_meta("base_scale"):
+		node.set_meta("base_scale", node.scale)
+	return node.get_meta("base_scale")
+
+
+func _flash(node: Node3D) -> void:
+	var meshes: Array = node.get_meta("flash_meshes") if node.has_meta("flash_meshes") else []
+	if not node.has_meta("flash_meshes"):
+		for m in node.find_children("*", "MeshInstance3D", true, false):
+			var mi := m as MeshInstance3D
+			if mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY and mi.mesh != _hp_bar_mesh:
+				meshes.append(m)
+		node.set_meta("flash_meshes", meshes)
+	for m: MeshInstance3D in meshes:
+		m.material_overlay = _flash_mat
+	get_tree().create_timer(0.07).timeout.connect(func():
+		for m: MeshInstance3D in meshes:
+			if is_instance_valid(m):
+				m.material_overlay = null)
 
 
 func _dtype_color(dtype: String) -> Color:
