@@ -34,6 +34,13 @@ static func waves_for(run: RunState, node: Dictionary) -> Array:
 
 ## Copies the battle outcome back into the run. `waves_cleared` counts completed waves.
 static func finish_combat(run: RunState, sim: BattleSim, node: Dictionary, waves_cleared: int) -> void:
+	var damage := {}
+	for k in sim.stats.damage:
+		damage[k] = int(round(float(sim.stats.damage[k])))
+	run.history.append({"t": "encounter", "node": node.id, "type": node.type, "layer": int(node.layer),
+		"core_before": int(round(run.core_hp)), "core_after": int(round(sim.core_hp)), "waves": waves_cleared,
+		"time": snappedf(sim.time, 0.1), "leaks": int(sim.stats.leaks), "kills": int(sim.stats.kills),
+		"structures": sim.structures.size(), "gold_after": sim.gold, "damage": damage, "defeated": sim.defeated})
 	run.gold = sim.gold
 	run.core_hp = sim.core_hp
 	run.structures = sim.structures_snapshot()
@@ -92,6 +99,7 @@ static func shop_offer(run: RunState, node: Dictionary) -> Dictionary:
 static func buy(run: RunState, item: Dictionary) -> bool:
 	if run.gold < int(item.price) or run.upgrades.has(item.id):
 		return false
+	run.history.append({"t": "shop", "node": run.current_node, "bought": item.id, "price": int(item.price)})
 	run.gold -= int(item.price)
 	run.add_upgrade(item.id)
 	return true
@@ -135,6 +143,7 @@ static func apply_event(run: RunState, node: Dictionary, event_id: String, choic
 	var choice: Dictionary = ev.choices[choice_index]
 	if not can_afford(run, choice):
 		return {"ok": false}
+	run.history.append({"t": "event", "node": node.id, "event": event_id, "choice": choice_index})
 	var cost: Dictionary = choice.get("cost", {})
 	run.gold -= int(cost.get("gold", 0))
 	run.core_hp -= float(cost.get("core_hp", 0))
@@ -162,3 +171,10 @@ static func apply_event(run: RunState, node: Dictionary, event_id: String, choic
 		out.upgrade_choices = UpgradePool.roll(rng, run.upgrades, run.unlocks, reward.upgrade, 3)
 	run.core_hp = maxf(1.0, run.core_hp)
 	return out
+
+
+## Records an upgrade offer and the player's answer ("" = skipped).
+static func record_reward(run: RunState, offered: Array, picked: String, source: String = "reward") -> void:
+	run.history.append({"t": source, "node": run.current_node, "offered": offered.duplicate(), "picked": picked})
+	if picked != "":
+		run.add_upgrade(picked)

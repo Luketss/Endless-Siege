@@ -162,9 +162,10 @@ func _show_reward(choices: Array, title: String, allow_skip: bool = true) -> voi
 	var skip_gold := 30 + 5 * run.depth()
 	var on_skip := func():
 		run.gold += skip_gold
+		RunFlow.record_reward(run, choices, "")
 		_after_reward()
 	_set_overlay(Panels.reward(choices, run.mods(), title, func(id):
-		run.add_upgrade(id)
+		RunFlow.record_reward(run, choices, id)
 		Sfx.play("synergy")
 		_after_reward(), on_skip if allow_skip else Callable(), skip_gold))
 

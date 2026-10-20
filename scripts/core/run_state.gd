@@ -16,6 +16,8 @@ var upgrades: Array = []
 var journey: Dictionary = {}
 var current_node: String = ""
 var visited: Array = []
+## Chronological record of decisions and encounter outcomes (see RunLog).
+var history: Array = []
 var structures: Array = []
 var harder_next: float = 0.0
 var finished: bool = false
@@ -71,7 +73,7 @@ func to_dict() -> Dictionary:
 		"version": VERSION, "seed": run_seed, "hero_id": hero_id, "map_id": map_id, "modifiers": modifiers,
 		"unlocks": unlocks, "gold": gold, "core_hp": core_hp, "upgrades": upgrades, "journey": journey,
 		"current_node": current_node, "visited": visited, "structures": structures, "harder_next": harder_next,
-		"finished": finished, "victory": victory, "stats": stats, "hero_level": hero_level, "hero_xp": hero_xp,
+		"finished": finished, "victory": victory, "stats": stats, "hero_level": hero_level, "hero_xp": hero_xp, "log": history,
 	}
 
 
@@ -97,6 +99,7 @@ static func from_dict(d: Dictionary) -> RunState:
 	r.stats = d.get("stats", r.stats)
 	r.hero_level = int(d.get("hero_level", 1))
 	r.hero_xp = float(d.get("hero_xp", 0.0))
+	r.history = d.get("log", [])
 	return r
 
 

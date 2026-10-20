@@ -98,7 +98,7 @@ static func play_journey(seed_value: int, unlocks: Array = [], modifiers: Array 
 				if not run.finished:
 					var picks := RunFlow.reward_choices(run, node)
 					if not picks.is_empty():
-						run.add_upgrade(picks[pilot.rng.randi() % picks.size()])
+						RunFlow.record_reward(run, picks, picks[pilot.rng.randi() % picks.size()])
 			"shop":
 				var offer := RunFlow.shop_offer(run, node)
 				for item in offer.items:
@@ -112,5 +112,5 @@ static func play_journey(seed_value: int, unlocks: Array = [], modifiers: Array 
 					res = RunFlow.apply_event(run, node, ev, DataDB.events()[ev].choices.size() - 1)
 				var ups: Array = res.get("upgrade_choices", [])
 				if not ups.is_empty():
-					run.add_upgrade(ups[0])
+					RunFlow.record_reward(run, ups, ups[0], "event_reward")
 	return run

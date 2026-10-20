@@ -37,6 +37,7 @@ const DEFAULTS := {
 	"mouse_sensitivity": 1.0,
 	"invert_y": false,
 	"language": "auto",
+	"run_log": true,
 	"bindings": {},
 }
 

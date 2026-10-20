@@ -102,6 +102,8 @@ func finish_run(run: RunState) -> int:
 	st.best_layer = maxi(int(st.best_layer), run.depth())
 	st.kills = int(st.kills) + int(run.stats.kills)
 	st.waves = int(st.waves) + int(run.stats.waves)
+	if Settings.get_value("run_log"):
+		RunLog.append(run)
 	save()
 	clear_run()
 	return gained
