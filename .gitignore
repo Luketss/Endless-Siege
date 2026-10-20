@@ -3,3 +3,4 @@
 /build/
 export_credentials.cfg
 *.tmp
+__pycache__/
