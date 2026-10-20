@@ -1,0 +1,18 @@
+{
+	"dark_altar": { "title_key": "EV_ALTAR", "text_key": "EV_ALTAR_TXT", "choices": [
+		{ "key": "EV_ALTAR_A", "cost": { "core_hp": 20 }, "reward": { "upgrade": "rare" } },
+		{ "key": "EV_LEAVE" } ] },
+	"wandering_merchant": { "title_key": "EV_MERCHANT", "text_key": "EV_MERCHANT_TXT", "choices": [
+		{ "key": "EV_MERCHANT_A", "cost": { "gold": 140 }, "reward": { "upgrade": "epic" } },
+		{ "key": "EV_MERCHANT_B", "cost": { "gold": 50 }, "reward": { "core_hp": 25 } },
+		{ "key": "EV_LEAVE" } ] },
+	"ancient_map": { "title_key": "EV_MAP", "text_key": "EV_MAP_TXT", "choices": [
+		{ "key": "EV_MAP_A", "reward": { "gold": 120, "next_combat_harder": 0.35 } },
+		{ "key": "EV_LEAVE" } ] },
+	"abandoned_armory": { "title_key": "EV_ARMORY", "text_key": "EV_ARMORY_TXT", "choices": [
+		{ "key": "EV_ARMORY_A", "reward": { "gold": 90 } },
+		{ "key": "EV_ARMORY_B", "cost": { "core_hp": 10 }, "reward": { "upgrade": "common", "gold": 40 } } ] },
+	"cursed_well": { "title_key": "EV_WELL", "text_key": "EV_WELL_TXT", "choices": [
+		{ "key": "EV_WELL_A", "reward": { "gamble": 0.5 } },
+		{ "key": "EV_LEAVE" } ] }
+}

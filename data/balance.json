@@ -1,0 +1,16 @@
+{
+	"start_gold": 260,
+	"core_max_hp": 100,
+	"sell_refund": 0.7,
+	"wave_clear_gold": 45,
+	"wave_clear_gold_per_depth": 10,
+	"hero_respawn": 7.0,
+	"crit_multiplier": 2.0,
+	"elite": { "hp_mult": 2.6, "gold_mult": 3.0, "scale": 1.35, "chance": 0.22 },
+	"upgrade_level_cost": [0.75, 1.25],
+	"upgrade_level_bonus": { "damage": 0.45, "range": 0.1, "rate": 0.1 },
+	"rarity_weights": { "common": 60, "rare": 28, "epic": 10, "legendary": 2 },
+	"shop": { "prices": { "common": 70, "rare": 120, "epic": 190, "legendary": 280 }, "repair_cost": 60, "repair_amount": 30 },
+	"rest_heal_pct": 0.4,
+	"essence": { "per_wave": 1, "per_combat": 4, "per_elite": 8, "per_boss": 30, "victory_bonus": 20 }
+}

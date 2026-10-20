@@ -1,0 +1,34 @@
+{
+	"arrow": {
+		"kind": "tower", "name_key": "S_ARROW", "desc_key": "S_ARROW_DESC", "cost": 60, "radius": 1.1, "height": 4.0,
+		"range": 13.0, "rate": 1.25, "damage": 9.0, "dtype": "physical", "hits_air": true,
+		"projectile": { "style": "arrow", "speed": 40.0 }, "color": "c9a26b", "unlocked": true, "tags": ["arrow"]
+	},
+	"cannon": {
+		"kind": "tower", "name_key": "S_CANNON", "desc_key": "S_CANNON_DESC", "cost": 100, "radius": 1.3, "height": 3.2,
+		"range": 11.0, "rate": 0.55, "damage": 24.0, "dtype": "physical", "hits_air": false, "splash": 2.6,
+		"projectile": { "style": "ballistic", "speed": 22.0 }, "color": "6b6f78", "unlocked": true, "tags": ["cannon"]
+	},
+	"frost": {
+		"kind": "tower", "name_key": "S_FROST", "desc_key": "S_FROST_DESC", "cost": 90, "radius": 1.1, "height": 3.8,
+		"range": 10.0, "rate": 0.9, "damage": 5.0, "dtype": "ice", "hits_air": true,
+		"chill": { "slow": 0.35, "duration": 2.2 },
+		"projectile": { "style": "orb", "speed": 26.0 }, "color": "7fd3f5", "unlocked": true, "tags": ["ice"]
+	},
+	"banner": {
+		"kind": "support", "name_key": "S_BANNER", "desc_key": "S_BANNER_DESC", "cost": 85, "radius": 0.9, "height": 4.5,
+		"range": 6.5, "aura": { "damage": 0.18, "rate": 0.12 }, "color": "e8c04a", "unlocked": false, "tags": ["support"]
+	},
+	"spikes": {
+		"kind": "trap", "name_key": "S_SPIKES", "desc_key": "S_SPIKES_DESC", "cost": 40, "size": 2.0,
+		"damage": 7.0, "dtype": "physical", "cooldown": 0.8, "color": "9b9b9b", "unlocked": true, "tags": ["trap"]
+	},
+	"spring": {
+		"kind": "trap", "name_key": "S_SPRING", "desc_key": "S_SPRING_DESC", "cost": 70, "size": 2.0,
+		"push": 7.0, "cooldown": 4.0, "max_targets": 6, "color": "d07b3c", "unlocked": true, "tags": ["trap", "push"]
+	},
+	"tar": {
+		"kind": "trap", "name_key": "S_TAR", "desc_key": "S_TAR_DESC", "cost": 50, "size": 2.0,
+		"slow": 0.5, "oil_duration": 4.0, "cooldown": 0.0, "color": "2a2320", "unlocked": false, "tags": ["trap", "oil"]
+	}
+}

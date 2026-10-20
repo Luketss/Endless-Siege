@@ -1,0 +1,17 @@
+{
+	"grunt":     { "name_key": "E_GRUNT",    "hp": 30,   "speed": 3.4, "armor": 0, "gold": 4,   "leak": 1,  "contact": 6,  "size": 0.55, "color": "6f9a3e", "budget": 1.0 },
+	"runner":    { "name_key": "E_RUNNER",   "hp": 20,   "speed": 6.2, "armor": 0, "gold": 4,   "leak": 1,  "contact": 4,  "size": 0.45, "color": "d6c341", "budget": 1.1 },
+	"brute":     { "name_key": "E_BRUTE",    "hp": 150,  "speed": 2.2, "armor": 5, "gold": 14,  "leak": 3,  "contact": 16, "size": 0.95, "color": "7b5a43", "budget": 4.5 },
+	"wisp":      { "name_key": "E_WISP",     "hp": 34,   "speed": 3.8, "armor": 0, "gold": 6,   "leak": 2,  "contact": 0,  "size": 0.5,  "color": "b48cf0", "budget": 1.8, "flying": true },
+	"splitter":  { "name_key": "E_SPLITTER", "hp": 70,   "speed": 3.0, "armor": 0, "gold": 7,   "leak": 2,  "contact": 8,  "size": 0.75, "color": "4fb39a", "budget": 3.0, "split": { "into": "splitling", "count": 2 } },
+	"splitling": { "name_key": "E_SPLITLING","hp": 18,   "speed": 4.2, "armor": 0, "gold": 2,   "leak": 1,  "contact": 3,  "size": 0.38, "color": "7fd9c2", "budget": 0.6 },
+	"hexer":     { "name_key": "E_HEXER",    "hp": 65,   "speed": 3.0, "armor": 0, "gold": 12,  "leak": 2,  "contact": 6,  "size": 0.6,  "color": "8a3fa8", "budget": 4.0, "hex": { "radius": 5.5, "interval": 7.0, "duration": 3.0 } },
+	"warden":    { "name_key": "E_WARDEN",   "hp": 95,   "speed": 2.8, "armor": 2, "gold": 12,  "leak": 2,  "contact": 10, "size": 0.8,  "color": "3f6fb0", "budget": 4.0, "aura": { "radius": 4.5, "reduction": 0.35 } },
+	"golem":     { "name_key": "E_GOLEM",    "hp": 2600, "speed": 1.55,"armor": 4, "gold": 220, "leak": 45, "contact": 30, "size": 2.0,  "color": "8c7b6a", "budget": 0, "boss": true,
+		"phases": [
+			{ "until": 0.66, "stomp_interval": 8.0 },
+			{ "until": 0.33, "stomp_interval": 7.0, "summon": { "type": "grunt", "count": 6, "interval": 9.0 }, "armor_add": 4 },
+			{ "until": 0.0,  "stomp_interval": 4.0, "summon": { "type": "runner", "count": 4, "interval": 8.0 }, "speed_mult": 1.6 }
+		],
+		"stomp": { "radius": 7.0, "disable": 3.0, "hero_damage": 25 } }
+}

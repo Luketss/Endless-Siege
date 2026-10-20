@@ -1,0 +1,11 @@
+{
+	"ranger": {
+		"name_key": "H_RANGER", "desc_key": "H_RANGER_DESC", "hp": 110, "speed": 7.2, "regen": 2.0,
+		"attack": { "damage": 13.0, "interval": 0.42, "speed": 55.0, "range": 45.0, "crit": 0.1 },
+		"dodge": { "distance": 6.0, "duration": 0.32, "cooldown": 1.4 },
+		"rain": { "radius": 4.2, "damage": 9.0, "hits": 8, "duration": 2.0, "cooldown": 11.0 },
+		"blast": { "range": 6.5, "angle": 70.0, "damage": 16.0, "push": 5.0, "cooldown": 8.0 },
+		"xp_curve": [40, 90, 160, 250, 360, 500, 680],
+		"level_bonus": { "damage": 0.1, "hp": 12 }
+	}
+}

@@ -1,0 +1,6 @@
+{
+	"hordes":     { "name_key": "MOD_HORDES",  "stats": { "enemy_count_pct": 0.4 }, "essence": 0.3 },
+	"glass_core": { "name_key": "MOD_GLASS",   "stats": { "core_max_hp_add": -50 }, "essence": 0.4 },
+	"swift_foes": { "name_key": "MOD_SWIFT",   "stats": { "enemy_speed_pct": 0.2 }, "essence": 0.3 },
+	"poverty":    { "name_key": "MOD_POVERTY", "stats": { "gold_kill_pct": -0.3, "wave_gold_pct": -0.3 }, "essence": 0.3 }
+}

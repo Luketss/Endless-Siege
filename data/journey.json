@@ -1,0 +1,9 @@
+{
+	"layers": 7,
+	"min_nodes": 2,
+	"max_nodes": 3,
+	"weights": { "combat": 45, "elite": 15, "shop": 14, "event": 16, "rest": 10 },
+	"waves": { "combat": 3, "elite": 3, "boss": 3 },
+	"first": "combat",
+	"last": "boss"
+}

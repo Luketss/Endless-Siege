@@ -1,0 +1,10 @@
+{
+	"pyromaniac":    { "requires": { "fire": 2 }, "stats": { "burn_damage_pct": 0.5 } },
+	"permafrost":    { "requires": { "ice": 2 }, "stats": { "chill_duration_add": 0.8 } },
+	"superconductor":{ "requires": { "ice": 1, "lightning": 1 }, "stats": { "shock_bonus_pct": 0.3 } },
+	"saboteur":      { "requires": { "trap": 2 }, "stats": { "trap_cooldown_pct": -0.2 } },
+	"marksman":      { "requires": { "crit": 2 }, "stats": { "crit_mult_add": 0.6 } },
+	"kinetic":       { "requires": { "push": 1, "trap": 2 }, "stats": { "spikes_damage_pct": 0.3 } },
+	"tactician":     { "requires": { "support": 1, "tower": 2 }, "stats": { "tower_damage_pct": 0.12 } },
+	"profiteer":     { "requires": { "economy": 2 }, "stats": { "wave_gold_pct": 0.3 } }
+}
