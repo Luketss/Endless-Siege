@@ -240,7 +240,7 @@ static func _imported_wall(root: Node3D, r: Rect2, env: Dictionary) -> bool:
 		if piece == null:
 			return false
 		piece.scale = Vector3(step, sc, sc * 0.6)
-		Assets.tint(piece, Color("9a9fa8"), false)
+		Assets.tint(piece, Color("767a83"), false, true)
 		Assets.no_self_shadow(piece)
 		var t := (i + 0.5) * step
 		piece.position = Vector3(r.position.x + t, 0, r.get_center().y) if horizontal else Vector3(r.get_center().x, 0, r.position.y + t)
@@ -251,7 +251,7 @@ static func _imported_wall(root: Node3D, r: Rect2, env: Dictionary) -> bool:
 		if pillar:
 			pillar.position = Vector3(r.position.x + end, 0, r.get_center().y) if horizontal else Vector3(r.get_center().x, 0, r.position.y + end)
 			pillar.scale.y = sc * 1.1
-			Assets.tint(pillar, Color("9a9fa8"), false)
+			Assets.tint(pillar, Color("6a6e77"), false, true)
 			Assets.no_self_shadow(pillar)
 			root.add_child(pillar)
 	return true

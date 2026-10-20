@@ -37,6 +37,20 @@ func select_slot(i: int) -> void:
 	Sfx.play("ui")
 
 
+## Gamepad: step through the hotbar (wraps; one step past the ends deselects).
+func cycle_slot(dir: int) -> void:
+	var s := slots()
+	if s.is_empty():
+		return
+	var i := s.find(selected)
+	if i == -1:
+		i = 0 if dir > 0 else s.size() - 1
+	else:
+		i += dir
+	selected = s[i] if i >= 0 and i < s.size() else ""
+	Sfx.play("ui")
+
+
 func cancel() -> void:
 	selected = ""
 	_clear_ghost()

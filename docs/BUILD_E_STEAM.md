@@ -28,7 +28,8 @@ Saída: `build/windows/` e `build/linux/`. Cada um tem o executável e o `.pck`;
 ## Steam Deck
 
 - Use o build de **Linux** (nativo). A interface escala com a resolução (padrão de 1920×1080 com `canvas_items`/`expand`), e o 1280×800 do Deck funciona com a escala da interface ajustável.
-- **Pendente para o selo "Verificado":** suporte a controle (gamepad). O mapa de entrada é centralizado em `Settings.DEFAULT_BINDINGS`, então basta adicionar eventos de joystick e um modo de mira por analógico. Também falta testar o texto em 1280×800.
+- **Controle:** layout fixo em `Settings.PAD_BINDINGS` (analógicos, gatilhos, D-pad), câmera no analógico direito com resposta quadrática e mira assistida, dicas na tela que seguem o último dispositivo, e navegação de menus pelo autoload `PadFocus`. O remapeamento do controle fica com o Steam Input.
+- **Pendente para o selo "Verificado":** testar em um Deck real e conferir o tamanho do texto em 1280×800.
 
 ## Integração Steamworks (próximo passo)
 

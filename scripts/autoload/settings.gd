@@ -17,6 +17,19 @@ const DEFAULT_BINDINGS := {
 	"slot_5": ["key:5"], "slot_6": ["key:6"], "slot_7": ["key:7"],
 	"zoom_in": ["wheel_up"], "zoom_out": ["wheel_down"],
 }
+## Gamepad layout (Xbox naming; Steam Input maps other pads onto it). Always active
+## alongside the keyboard bindings; not remappable in game (Steam Input covers that).
+const PAD_BINDINGS := {
+	"move_forward": ["axis:1:-"], "move_back": ["axis:1:+"], "move_left": ["axis:0:-"], "move_right": ["axis:0:+"],
+	"look_up": ["axis:3:-"], "look_down": ["axis:3:+"], "look_left": ["axis:2:-"], "look_right": ["axis:2:+"],
+	"attack": ["axis:5:+"], "cancel": ["joy:1"], "dodge": ["joy:0"], "interact": ["joy:2"], "start_wave": ["joy:3"],
+	"ability_1": ["joy:9"], "ability_2": ["joy:10"], "upgrade": ["joy:11"], "sell": ["joy:12"],
+	"slot_prev": ["joy:13"], "slot_next": ["joy:14"], "target_mode": ["joy:8"], "game_speed": ["joy:7"],
+	"show_ranges": ["joy:4"], "pause": ["joy:6"],
+}
+const PAD_NAMES := {"joy:0": "A", "joy:1": "B", "joy:2": "X", "joy:3": "Y", "joy:4": "View", "joy:6": "Menu",
+	"joy:7": "L3", "joy:8": "R3", "joy:9": "LB", "joy:10": "RB", "joy:11": "D↑", "joy:12": "D↓",
+	"joy:13": "D←", "joy:14": "D→", "axis:5:+": "RT"}
 ## Actions shown in the remapping screen, in order.
 const REMAPPABLE := ["move_forward", "move_back", "move_left", "move_right", "attack", "ability_1", "ability_2",
 	"dodge", "interact", "start_wave", "upgrade", "sell", "target_mode", "show_ranges", "game_speed",
@@ -43,6 +56,10 @@ const DEFAULTS := {
 }
 
 var data: Dictionary = {}
+## True while the last input came from a gamepad (prompts switch to pad buttons).
+var using_pad := false
+
+signal device_changed
 
 
 func _ready() -> void:
@@ -52,6 +69,17 @@ func _ready() -> void:
 	for k in loaded:
 		data[k] = loaded[k]
 	apply_all()
+
+
+func _input(event: InputEvent) -> void:
+	var pad := using_pad
+	if event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf(event.axis_value) > 0.5):
+		pad = true
+	elif event is InputEventKey or event is InputEventMouseButton or (event is InputEventMouseMotion and event.relative.length() > 4.0):
+		pad = false
+	if pad != using_pad:
+		using_pad = pad
+		device_changed.emit()
 
 
 func get_value(key: String) -> Variant:
@@ -133,6 +161,16 @@ static func event_from_string(s: String) -> InputEvent:
 		var m := InputEventMouseButton.new()
 		m.button_index = int(s.substr(6)) as MouseButton
 		return m
+	if s.begins_with("joy:"):
+		var j := InputEventJoypadButton.new()
+		j.button_index = int(s.substr(4)) as JoyButton
+		return j
+	if s.begins_with("axis:"):
+		var parts := s.split(":")
+		var a := InputEventJoypadMotion.new()
+		a.axis = int(parts[1]) as JoyAxis
+		a.axis_value = -1.0 if parts[2] == "-" else 1.0
+		return a
 	if s == "wheel_up" or s == "wheel_down":
 		var w := InputEventMouseButton.new()
 		w.button_index = MOUSE_BUTTON_WHEEL_UP if s == "wheel_up" else MOUSE_BUTTON_WHEEL_DOWN
@@ -196,16 +234,23 @@ func reset_bindings() -> void:
 
 
 func _apply_input() -> void:
-	for action in DEFAULT_BINDINGS:
+	var actions := DEFAULT_BINDINGS.keys()
+	for a in PAD_BINDINGS:
+		if not actions.has(a):
+			actions.append(a)
+	for action in actions:
 		if not InputMap.has_action(action):
-			InputMap.add_action(action, 0.2)
+			InputMap.add_action(action, 0.25)
 		InputMap.action_erase_events(action)
-		for s in bindings_for(action):
+		for s in bindings_for(action) + PAD_BINDINGS.get(action, []):
 			var e := event_from_string(s)
 			if e:
 				InputMap.action_add_event(action, e)
 
 
 func action_label(action: String) -> String:
+	if using_pad:
+		var pad: Array = PAD_BINDINGS.get(action, [])
+		return PAD_NAMES.get(pad[0], "—") if not pad.is_empty() else ""
 	var list := bindings_for(action)
 	return display_name(list[0]) if not list.is_empty() else "—"

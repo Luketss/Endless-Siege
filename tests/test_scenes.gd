@@ -25,6 +25,8 @@ func _open(path: String) -> Node:
 func test_main_menu_loads() -> void:
 	var m := await _open("res://scenes/main_menu.tscn")
 	check(m.ui != null and m.ui.get_child_count() > 1, "menu built")
+	var first := PadFocus.first_button(get_tree().root)
+	check(first != null and m.is_ancestor_of(first), "gamepad finds a menu button to focus")
 	m._show("sanctuary")
 	m._show("new_run")
 	await _frames(2)
@@ -114,6 +116,27 @@ func test_hero_and_build_input() -> void:
 	await _frames(2)
 	Input.action_release("cancel")
 	check(g.build.selected == "", "right click cancels")
+	# Abilities aim while held (preview visible, nothing cast) and fire on release.
+	Input.action_press("ability_1")
+	await _physics(3)
+	check(g.hero._rain_preview.visible and g.sim.hero.rain_cd <= 0.0, "holding Q shows the rain area")
+	Input.action_release("ability_1")
+	await _physics(2)
+	check(g.sim.hero.rain_cd > 0.0 and not g.hero._rain_preview.visible, "releasing Q casts the rain")
+	# Gamepad: d-pad cycles the hotbar, prompts follow the last device.
+	Input.action_press("slot_next")
+	await _frames(2)
+	Input.action_release("slot_next")
+	check(g.build.selected == "arrow", "d-pad right selects the first structure")
+	Input.action_press("slot_prev")
+	await _frames(2)
+	Input.action_release("slot_prev")
+	check(g.build.selected == "", "d-pad left past the start deselects")
+	var settings: Node = get_tree().root.get_node("Settings")
+	settings.using_pad = true
+	check(settings.action_label("attack") == "RT" and settings.action_label("dodge") == "A", "pad prompts")
+	settings.using_pad = false
+	check(InputMap.has_action("look_left") and Settings.event_from_string("axis:5:+") is InputEventJoypadMotion, "pad bindings")
 	Input.action_press("start_wave")
 	await _frames(2)
 	Input.action_release("start_wave")

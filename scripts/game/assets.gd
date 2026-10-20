@@ -140,15 +140,20 @@ static func prop(path: String, scale: float, rot_y: float = 0.0) -> Node3D:
 
 ## Multiplies the model colors by `color` (optionally adding a soft glow). Materials are
 ## cached per (source material, color) so repeated props share them.
-static func tint(node: Node, color: Color, glow: bool = true) -> void:
+## With `flat`, the texture is dropped and the colour replaces it (used for stone that
+## would otherwise inherit the warm palette of the source pack).
+static func tint(node: Node, color: Color, glow: bool = true, flat: bool = false) -> void:
 	for mi in _meshes(node):
 		var base: Material = mi.get_active_material(0)
-		var key := "%s|%s|%s" % [base.get_instance_id() if base else 0, color.to_html(), glow]
+		var key := "%s|%s|%s|%s" % [base.get_instance_id() if base else 0, color.to_html(), glow, flat]
 		if not _tex_mats.has(key):
 			var m := StandardMaterial3D.new()
 			if base is StandardMaterial3D:
 				m = (base as StandardMaterial3D).duplicate()
 			m.albedo_color = m.albedo_color * color
+			if flat:
+				m.albedo_texture = null
+				m.albedo_color = color
 			if glow:
 				m.emission_enabled = true
 				m.emission = color

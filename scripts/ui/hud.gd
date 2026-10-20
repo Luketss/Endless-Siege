@@ -126,7 +126,11 @@ func _build() -> void:
 	bc.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	bc.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bc.position.y -= 20
-	_hint = UITheme.label("", "Dim", HORIZONTAL_ALIGNMENT_CENTER)
+	_hint = UITheme.label("", "", HORIZONTAL_ALIGNMENT_CENTER)
+	_hint.add_theme_font_size_override("font_size", 19)
+	_hint.add_theme_color_override("font_color", Color(0.93, 0.92, 0.88))
+	_hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_hint.add_theme_constant_override("outline_size", 6)
 	bc.add_child(_hint)
 	_hotbar = HBoxContainer.new()
 	_hotbar.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -331,7 +335,7 @@ func _refresh_info(sim: BattleSim, build: BuildController) -> void:
 		txt = "[b][color=#f2c14e]%s[/color][/b]  ◆ %d\n%s" % [Texts.structure_name(build.selected), sim.structure_cost(build.selected), tr(def.desc_key)]
 		if not build.last_check.is_empty() and not build.last_check.ok:
 			txt += "\n[color=#ff5a4f]%s[/color]" % tr(build.last_check.reason)
-		txt += "\n[color=#9a9fb0]%s[/color]" % (tr("HUD_PLACE_HINT") % [Settings.action_label("attack"), "RMB"])
+		txt += "\n[color=#9a9fb0]%s[/color]" % (tr("HUD_PLACE_HINT") % [Settings.action_label("attack"), Settings.action_label("cancel")])
 	elif build.hovered:
 		var st := build.hovered
 		txt = "[b][color=#f2c14e]%s[/color][/b]  %s %d\n" % [Texts.structure_name(st.type), tr("HUD_LEVEL"), st.level]

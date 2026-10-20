@@ -24,6 +24,7 @@ Settings="*res://scripts/autoload/settings.gd"
 Profile="*res://scripts/autoload/profile.gd"
 Sfx="*res://scripts/autoload/sfx.gd"
 Music="*res://scripts/autoload/music.gd"
+PadFocus="*res://scripts/autoload/pad_focus.gd"
 
 [display]
 

@@ -265,6 +265,10 @@ func _handle_input() -> void:
 	for i in 7:
 		if Input.is_action_just_pressed("slot_%d" % (i + 1)):
 			build.select_slot(i)
+	if Input.is_action_just_pressed("slot_prev"):
+		build.cycle_slot(-1)
+	elif Input.is_action_just_pressed("slot_next"):
+		build.cycle_slot(1)
 	if Input.is_action_just_pressed("show_ranges"):
 		view.show_all_ranges = not view.show_all_ranges
 	if Input.is_action_just_pressed("game_speed"):

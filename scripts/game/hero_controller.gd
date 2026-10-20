@@ -2,6 +2,8 @@ class_name HeroController
 extends CharacterBody3D
 ## Player-controlled hero (Ranger): WASD movement relative to the camera, LMB shoots,
 ## Q arrow rain at the crosshair, E concussive blast, Space dodge roll, F interact.
+## Abilities aim while the key is held (area/cone preview) and fire on release;
+## a quick tap fires immediately. Right click cancels the aim.
 ## Gameplay effects go through BattleSim so they are testable and consistent.
 
 const GRAVITY := 26.0
@@ -16,6 +18,9 @@ var _dodge_dir := Vector3.ZERO
 var _was_alive := true
 var _recoil := 0.0
 var _time := 0.0
+var _aiming_ability := ""  # "rain" | "blast" while the key is held
+var _rain_preview: Node3D
+var _blast_preview: MeshInstance3D
 
 
 func _ready() -> void:
@@ -31,6 +36,55 @@ func _ready() -> void:
 	add_child(shape)
 	model = Models.hero()
 	add_child(model)
+	_build_previews()
+
+
+func _build_previews() -> void:
+	_rain_preview = Node3D.new()
+	_rain_preview.top_level = true
+	add_child(_rain_preview)
+	var disc := MeshInstance3D.new()
+	disc.mesh = Art.cyl(1.0, 1.0, 0.04, 40)
+	disc.material_override = _preview_mat(0.22)
+	disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_rain_preview.add_child(disc)
+	var edge := MeshInstance3D.new()
+	edge.mesh = Art.torus(0.93, 1.0)
+	edge.material_override = _preview_mat(0.8)
+	edge.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_rain_preview.add_child(edge)
+	_rain_preview.visible = false
+	_blast_preview = MeshInstance3D.new()
+	_blast_preview.top_level = true
+	_blast_preview.material_override = _preview_mat(0.3)
+	_blast_preview.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_blast_preview)
+	_blast_preview.visible = false
+
+
+func _preview_mat(alpha: float) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.no_depth_test = false
+	m.albedo_color = Color(0.67, 1.0, 0.72, alpha)
+	return m
+
+
+## Flat fan mesh for the blast cone (pointing along -Z).
+static func cone_mesh(radius: float, angle_deg: float) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var half := deg_to_rad(angle_deg * 0.5)
+	var seg := 16
+	for i in seg:
+		var a0 := -half + 2.0 * half * i / seg
+		var a1 := -half + 2.0 * half * (i + 1) / seg
+		st.add_vertex(Vector3.ZERO)
+		st.add_vertex(Vector3(sin(a0), 0, -cos(a0)) * radius)
+		st.add_vertex(Vector3(sin(a1), 0, -cos(a1)) * radius)
+	return st.commit()
 
 
 func place_at_spawn() -> void:
@@ -44,6 +98,7 @@ func _physics_process(delta: float) -> void:
 	_time += delta
 	var h := sim.hero
 	if not h.alive:
+		_cancel_aim()
 		if model.has_meta("anim"):
 			if _was_alive:
 				Assets.play(model, "death", 1.0, 0.05)
@@ -86,6 +141,7 @@ func _physics_process(delta: float) -> void:
 
 func _combat_input() -> void:
 	if not input_enabled:
+		_cancel_aim()
 		return
 	var muzzle := global_position + Vector3(0, 1.45, 0) + rig.right_flat() * 0.35
 	if Input.is_action_pressed("attack") and not attack_blocked:
@@ -93,21 +149,69 @@ func _combat_input() -> void:
 		if sim.hero_attack(muzzle, aim - muzzle):
 			_recoil = 1.0
 	if Input.is_action_just_pressed("ability_1"):
-		var p = rig.world_hit(40.0)
-		if p == null:
-			p = global_position + rig.forward_flat() * 12.0
-		var target: Vector3 = p
-		if Vector2(target.x, target.z).distance_to(Vector2(global_position.x, global_position.z)) > 32.0:
-			var dir := (target - global_position)
-			dir.y = 0.0
-			target = global_position + dir.normalized() * 32.0
-		if not sim.hero_rain(target):
-			Sfx.play("deny", 0.3)
-	if Input.is_action_just_pressed("ability_2"):
-		if not sim.hero_blast(global_position, rig.forward_flat()):
-			Sfx.play("deny", 0.3)
+		_aiming_ability = "rain"
+	elif Input.is_action_just_pressed("ability_2"):
+		_aiming_ability = "blast"
+	if _aiming_ability != "" and Input.is_action_just_pressed("cancel"):
+		_aiming_ability = ""
+	match _aiming_ability:
+		"rain":
+			if Input.is_action_pressed("ability_1"):
+				_show_preview()
+			else:
+				_aiming_ability = ""
+				if not sim.hero_rain(rain_target()):
+					Sfx.play("deny", 0.3)
+		"blast":
+			if Input.is_action_pressed("ability_2"):
+				_show_preview()
+			else:
+				_aiming_ability = ""
+				if not sim.hero_blast(global_position, rig.forward_flat()):
+					Sfx.play("deny", 0.3)
+	_rain_preview.visible = _aiming_ability == "rain"
+	_blast_preview.visible = _aiming_ability == "blast"
 	if Input.is_action_just_pressed("interact"):
 		sim.hero_interact()
+
+
+func _cancel_aim() -> void:
+	_aiming_ability = ""
+	_rain_preview.visible = false
+	_blast_preview.visible = false
+
+
+## Ground point for the arrow rain: under the crosshair, clamped to 32 m.
+func rain_target() -> Vector3:
+	var p = rig.world_hit(40.0)
+	if p == null:
+		p = global_position + rig.forward_flat() * 12.0
+	var target: Vector3 = p
+	if Vector2(target.x, target.z).distance_to(Vector2(global_position.x, global_position.z)) > 32.0:
+		var dir := (target - global_position)
+		dir.y = 0.0
+		target = global_position + dir.normalized() * 32.0
+	return target
+
+
+func _show_preview() -> void:
+	var h := sim.hero
+	var ready := (h.rain_cd if _aiming_ability == "rain" else h.blast_cd) <= 0.0
+	var col := Color(0.67, 1.0, 0.72) if ready else Color(1.0, 0.45, 0.4)
+	if _aiming_ability == "rain":
+		_rain_preview.global_position = rain_target() + Vector3(0, 0.08, 0)
+		_rain_preview.scale = Vector3.ONE * float(h.def.rain.radius)
+		for c: MeshInstance3D in _rain_preview.get_children():
+			var m := c.material_override as StandardMaterial3D
+			m.albedo_color = Color(col, m.albedo_color.a)
+	else:
+		if _blast_preview.mesh == null:
+			var b: Dictionary = h.def.blast
+			_blast_preview.mesh = cone_mesh(float(b.range), float(b.angle))
+		_blast_preview.global_position = global_position + Vector3(0, 0.1, 0)
+		_blast_preview.rotation = Vector3(0, rig.yaw, 0)
+		var bm := _blast_preview.material_override as StandardMaterial3D
+		bm.albedo_color = Color(col, bm.albedo_color.a)
 
 
 func _animate(delta: float, move: Vector3) -> void:

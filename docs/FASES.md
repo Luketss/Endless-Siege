@@ -51,7 +51,7 @@ Cada fase indica o critério de conclusão, como reproduzir e o estado atual. "�
 | Builds de Windows e Linux pela CLI e pela CI | Executar e testar o build de Windows em máquina Windows |
 | Modelos de upload SteamPipe | IDs de app/depot, integração GodotSteam, conquistas, Steam Cloud |
 | Checklist da loja | Página da loja, trailer, cápsulas, requisitos mínimos medidos |
-| | Suporte a controle (necessário para o Steam Deck "Verificado") |
+| Suporte a controle (layout Xbox, menus pelo D-pad) | Teste em Steam Deck real |
 
 ## Próximo conteúdo (depois de validar o núcleo)
 
