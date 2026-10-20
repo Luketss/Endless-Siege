@@ -30,7 +30,8 @@ func _run() -> void:
 	var items: Array = []
 	for type in vis.enemies:
 		items.append([type, Assets.creature(vis.enemies[type])])
-	items.append(["hero", Assets.creature(vis.hero)])
+	for id in vis.heroes:
+		items.append([id, Assets.creature(vis.heroes[id])])
 	var x := -float(items.size()) * 1.6
 	for it in items:
 		var node: Node3D = it[1]

@@ -510,9 +510,19 @@ func handle_event(e: Dictionary) -> void:
 			Sfx.play("gold")
 		"hero_fire":
 			Sfx.play_at("bow", e.pos, 0.03)
+		"hero_swing":
+			var d := (e.dir as Vector3).normalized()
+			fx.ring(e.pos - Vector3(0, 0.9, 0) + d * 1.4, 1.6, Color(1, 1, 1, 0.6), 0.18, 0.08)
+			Sfx.play_at("dodge" if int(e.hits) == 0 else "hit", e.pos, 0.03, 1.2)
 		"ability":
 			if e.name == "rain":
 				fx.ring(e.pos, 4.2, Color("aaffb8"), 0.5)
+			elif e.name == "slam":
+				fx.ring(e.pos, float(e.radius), Color("ffd27a"), 0.5, 0.2)
+				fx.burst(e.pos, float(e.radius) * 0.7, Color(0.7, 0.55, 0.35, 0.45), 0.35)
+				Sfx.play_at("stomp", e.pos, 0.0, 1.3)
+			elif e.name == "charge":
+				fx.sparks(e.pos + Vector3(0, 0.6, 0), Color("ffe0a0"), 14, 6.0)
 			else:
 				fx.burst(e.pos + Vector3(0, 1, 0) + (e.dir as Vector3).normalized() * 2.5, 3.0, Color(0.8, 1.0, 0.85, 0.5), 0.3)
 			Sfx.play_at("spring", e.pos, 0.0, 1.3)

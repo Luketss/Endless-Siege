@@ -28,6 +28,7 @@ class Enemy:
 	var chill_t: float = 0.0
 	var chill_slow: float = 0.0
 	var frozen_t: float = 0.0
+	var stun_t: float = 0.0  # warrior slam: no movement or attacks
 	var chill_accum: float = 0.0
 	var burn_t: float = 0.0
 	var burn_dps: float = 0.0
@@ -126,6 +127,6 @@ class Hero:
 	var xp: float = 0.0
 	var attack_cd: float = 0.0
 	var dodge_cd: float = 0.0
-	var rain_cd: float = 0.0
-	var blast_cd: float = 0.0
+	var rain_cd: float = 0.0  # ability 1 cooldown (rain / slam)
+	var blast_cd: float = 0.0  # ability 2 cooldown (blast / charge)
 	var regen_delay: float = 0.0

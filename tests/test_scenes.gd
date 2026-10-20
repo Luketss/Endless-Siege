@@ -145,6 +145,33 @@ func test_hero_and_build_input() -> void:
 	await _frames(2)
 
 
+func test_warrior_in_battle() -> void:
+	var profile: Node = get_tree().root.get_node("Profile")
+	profile.active_run = RunState.create(98, "warrior", [], [])
+	var g := await _open("res://scenes/game.tscn")
+	g._enter_node("0-0")
+	await _frames(10)
+	check(g.hero.hero_id == "warrior", "warrior model")
+	Input.action_press("attack")
+	await _physics(3)
+	Input.action_release("attack")
+	check(g.sim.hero.attack_cd > 0.0, "sword swing")
+	Input.action_press("ability_1")
+	await _physics(3)
+	check(g.hero._rain_preview.visible, "slam radius preview")
+	Input.action_release("ability_1")
+	await _physics(2)
+	check(g.sim.hero.rain_cd > 0.0, "slam cast")
+	var start: Vector3 = g.hero.global_position
+	Input.action_press("ability_2")
+	await _physics(2)
+	Input.action_release("ability_2")
+	await _physics(20)
+	check(g.sim.hero.blast_cd > 0.0 and g.hero.global_position.distance_to(start) > 3.0, "charge dashes forward")
+	g.queue_free()
+	await _frames(2)
+
+
 func _physics(n: int) -> void:
 	for i in n:
 		await get_tree().physics_frame

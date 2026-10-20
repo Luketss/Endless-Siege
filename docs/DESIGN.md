@@ -65,6 +65,19 @@ Ganha XP com abates e sobe de nível (+10% de dano e +12 de vida por nível), ma
 
 Inimigos que encostam nela atacam com uma preparação de 0,4 s (animação de golpe e anel vermelho no chão). O dano só sai se ela continuar ao alcance no fim da preparação, então se afastar ou esquivar evita o golpe; depois o inimigo espera 1,2 s para atacar de novo.
 
+## Herói: Guerreiro (desbloqueio no Santuário, 30 de essência)
+
+170 de vida, 6,6 m/s, regeneração de 3/s. Segura a estrada no corpo a corpo enquanto as torres fazem o resto.
+
+| Ação | Efeito |
+|---|---|
+| LMB | Golpe de espada de 24 de dano em arco de 140° e 3,2 m, a cada 0,55 s; acerta todos os inimigos terrestres no arco |
+| Q — Impacto no Chão | 28 de dano num raio de 4,5 m ao redor dele, inclusive voadores; atordoa por 1,4 s (exceto o chefe); recarga de 10 s |
+| E — Investida de Escudo | Avança 8 m em 0,3 s, invulnerável; 20 de dano e empurra 4 m pela estrada quem estiver na faixa; recarga de 8 s |
+| Espaço — Esquiva | Igual à da Patrulheira |
+
+O golpe básico não alcança voadores, então a defesa antiaérea depende das torres e do Impacto.
+
 ## Melhorias (28)
 
 | Raridade | Melhorias |

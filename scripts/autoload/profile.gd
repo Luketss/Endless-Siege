@@ -63,9 +63,21 @@ func challenges_available() -> bool:
 
 # ---------------------------------------------------------------- runs
 
-func new_run(modifiers: Array) -> RunState:
+## Heroes the player can pick: always the Ranger, others once unlocked in the Sanctuary.
+func available_heroes() -> Array:
+	var out := []
+	for id in DataDB.heroes():
+		var unlock: String = DataDB.heroes()[id].get("unlock", "")
+		if unlock == "" or is_unlocked(unlock):
+			out.append(id)
+	return out
+
+
+func new_run(modifiers: Array, hero_id: String = "ranger") -> RunState:
 	var seed_value := int(Time.get_unix_time_from_system()) ^ randi()
-	active_run = RunState.create(seed_value, "ranger", modifiers, data.unlocks)
+	if not available_heroes().has(hero_id):
+		hero_id = "ranger"
+	active_run = RunState.create(seed_value, hero_id, modifiers, data.unlocks)
 	data.stats.runs = int(data.stats.runs) + 1
 	save()
 	save_run(active_run)

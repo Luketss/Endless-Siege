@@ -253,8 +253,8 @@ static func cache() -> Node3D:
 	return root
 
 
-static func hero() -> Node3D:
-	var imported := Assets.creature(DataDB.visuals().get("hero", {}))
+static func hero(id: String = "ranger") -> Node3D:
+	var imported := Assets.creature(DataDB.visuals().get("heroes", {}).get(id, {}))
 	if imported:
 		imported.set_meta("parts", {})
 		return imported

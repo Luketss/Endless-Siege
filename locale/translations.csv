@@ -34,6 +34,13 @@ MOD_POVERTY,Poverty,Escassez
 MOD_POVERTY_DESC,30% less gold from kills and waves.,30% menos ouro de abates e ondas.
 H_RANGER,Ranger,Patrulheira
 H_RANGER_DESC,Ranged precision fighter.\n[b]LMB[/b] fast arrows · [b]Q[/b] Arrow Rain on the crosshair · [b]E[/b] Concussive Blast (pushes enemies back) · [b]Space[/b] dodge roll.,Combatente de precisão à distância.\n[b]LMB[/b] flechas rápidas · [b]Q[/b] Chuva de Flechas na mira · [b]E[/b] Rajada Concussiva (empurra inimigos) · [b]Espaço[/b] rolamento de esquiva.
+H_WARRIOR,Warrior,Guerreiro
+H_WARRIOR_DESC,"Sturdy melee fighter: 170 health.\n[b]LMB[/b] wide sword swings · [b]Q[/b] Ground Slam (stuns around you, hits fliers) · [b]E[/b] Shield Charge (dash that knocks enemies back down the road) · [b]Space[/b] dodge roll.",Lutador corpo a corpo resistente: 170 de vida.\n[b]LMB[/b] golpes largos de espada · [b]Q[/b] Impacto no Chão (atordoa ao redor e acerta voadores) · [b]E[/b] Investida de Escudo (avanço que empurra inimigos de volta pela estrada) · [b]Espaço[/b] rolamento de esquiva.
+UNL_WARRIOR_DESC,A second hero: holds the road in melee.,"Um segundo herói, que segura a estrada no corpo a corpo."
+MENU_HERO_LOCKED,unlock in the Sanctuary,desbloqueie no Santuário
+AB_SWING,Swing,Golpe
+AB_SLAM,Slam,Impacto
+AB_CHARGE,Charge,Investida
 AB_ATTACK,Shoot,Atirar
 AB_RAIN,Rain,Chuva
 AB_BLAST,Blast,Rajada

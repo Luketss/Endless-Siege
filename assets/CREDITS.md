@@ -17,6 +17,7 @@ Todos os modelos 3D e sons importados são **CC0 1.0 (domínio público)**: uso 
 | Elemento do jogo | Modelo |
 |---|---|
 | Patrulheira (heroína) | RPG Characters · Ranger |
+| Guerreiro | RPG Characters · Warrior |
 | Brutamonte | Animated Monster Pack · Skeleton |
 | Corredor | Cute Monsters · GreenDemon |
 | Bruto Blindado | Animated Knight · KnightCharacter |

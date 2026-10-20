@@ -27,7 +27,9 @@ func test_all_referenced_assets_load() -> void:
 func test_creature_animations_exist() -> void:
 	var vis := DataDB.visuals()
 	var cfgs: Dictionary = vis.enemies.duplicate()
-	cfgs["hero"] = vis.hero
+	for id in vis.heroes:
+		cfgs["hero_" + id] = vis.heroes[id]
+	check(vis.heroes.has_all(DataDB.heroes().keys()), "every hero has visuals")
 	for key in cfgs:
 		var node := Assets.creature(cfgs[key])
 		check(node != null, "%s builds" % key)

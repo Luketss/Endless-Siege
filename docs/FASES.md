@@ -55,7 +55,7 @@ Cada fase indica o critério de conclusão, como reproduzir e o estado atual. "�
 
 ## Próximo conteúdo (depois de validar o núcleo)
 
-1. Guerreiro e Mago (os dados de herói já suportam vários heróis; faltam modelo e habilidades em `HeroController`).
+1. Mago (o Guerreiro já está pronto; heróis são definidos em `data/heroes.json` e as habilidades ficam em `BattleSim`).
 2. Novos biomas e mapas (ruínas, fortalezas, cavernas) com desafios ambientais.
 3. Estruturas de atração ou agrupamento (iscas) e armadilhas elementais adicionais.
 4. Mais eventos, relíquias e chefes.

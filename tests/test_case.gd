@@ -26,9 +26,9 @@ func check_near(actual: float, expected: float, tol: float = 0.01, message: Stri
 const DT := 1.0 / 30.0
 
 
-func make_sim(gold: int = 1000, upgrades: Array = [], seed_value: int = 1, unlocks: Array = ["banner", "tar"]) -> BattleSim:
+func make_sim(gold: int = 1000, upgrades: Array = [], seed_value: int = 1, unlocks: Array = ["banner", "tar"], hero_id: String = "ranger") -> BattleSim:
 	var sim := BattleSim.new()
-	sim.setup(MapDef.from_dict(DataDB.map("forest")), RunMods.build(upgrades), gold, 100.0, 100.0, "ranger", seed_value, unlocks)
+	sim.setup(MapDef.from_dict(DataDB.map("forest")), RunMods.build(upgrades), gold, 100.0, 100.0, hero_id, seed_value, unlocks)
 	sim.hero.pos = Vector3(30, 0, 30)  # out of the way unless a test moves it
 	return sim
 

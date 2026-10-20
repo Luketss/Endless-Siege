@@ -328,7 +328,7 @@ func _refresh_hotbar(sim: BattleSim, build: BuildController) -> void:
 
 func _refresh_hero(sim: BattleSim) -> void:
 	var h := sim.hero
-	_hero_label.text = "%s  %s %d" % [tr("H_RANGER"), tr("HUD_LEVEL"), h.level]
+	_hero_label.text = "%s  %s %d" % [tr(h.def.name_key), tr("HUD_LEVEL"), h.level]
 	_hero_bar.max_value = h.max_hp
 	_hero_bar.value = h.hp
 	var nxt := sim.xp_to_next()
@@ -337,9 +337,9 @@ func _refresh_hero(sim: BattleSim) -> void:
 	_xp_bar.max_value = 1.0
 	_xp_bar.value = 1.0 if nxt < 0.0 else clampf((h.xp - prev) / maxf(1.0, nxt - prev), 0.0, 1.0)
 	var cds := {
-		"attack": [h.attack_cd, float(h.def.attack.interval), "AB_ATTACK"],
-		"ability_1": [h.rain_cd, sim._cd(float(h.def.rain.cooldown)), "AB_RAIN"],
-		"ability_2": [h.blast_cd, sim._cd(float(h.def.blast.cooldown)), "AB_BLAST"],
+		"attack": [h.attack_cd, float(h.def.attack.interval), "AB_SWING" if h.def.attack.get("melee", false) else "AB_ATTACK"],
+		"ability_1": [h.rain_cd, sim.ability_cooldown(0), "AB_" + sim.ability_id(0).to_upper()],
+		"ability_2": [h.blast_cd, sim.ability_cooldown(1), "AB_" + sim.ability_id(1).to_upper()],
 		"dodge": [h.dodge_cd, float(h.def.dodge.cooldown), "AB_DODGE"],
 	}
 	for k in cds:

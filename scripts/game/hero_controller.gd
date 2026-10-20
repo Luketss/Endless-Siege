@@ -18,7 +18,11 @@ var _dodge_dir := Vector3.ZERO
 var _was_alive := true
 var _recoil := 0.0
 var _time := 0.0
-var _aiming_ability := ""  # "rain" | "blast" while the key is held
+var _aiming_ability := ""  # ability id ("rain", "slam", ...) while its key is held
+var _cast_t := 0.0  # plays the cast animation
+var _charging := false
+var _dash_dist := 0.0
+var hero_id := "ranger"
 var _rain_preview: Node3D
 var _blast_preview: MeshInstance3D
 
@@ -87,6 +91,24 @@ static func cone_mesh(radius: float, angle_deg: float) -> ArrayMesh:
 	return st.commit()
 
 
+## Swaps the model when the run uses another hero.
+func set_hero(id: String) -> void:
+	if id == hero_id and model:
+		return
+	hero_id = id
+	if model:
+		model.queue_free()
+	model = Models.hero(id)
+	add_child(model)
+
+
+## Roll / charge: moves `distance` metres along `dir` in `duration` seconds.
+func _dash(dir: Vector3, distance: float, duration: float) -> void:
+	_dodge_t = duration
+	_dodge_dir = dir
+	_dash_dist = distance / duration
+
+
 func place_at_spawn() -> void:
 	global_position = sim.hero.pos + Vector3(0, 0.1, 0)
 	velocity = Vector3.ZERO
@@ -119,12 +141,13 @@ func _physics_process(delta: float) -> void:
 		if move.length() > 1.0:
 			move = move.normalized()
 		if Input.is_action_just_pressed("dodge") and sim.hero_dodge():
-			_dodge_t = float(def.dodge.duration)
-			_dodge_dir = move.normalized() if move.length() > 0.1 else f
+			_dash(move.normalized() if move.length() > 0.1 else f, float(def.dodge.distance), float(def.dodge.duration))
 	var vel := move * float(def.speed)
 	if _dodge_t > 0.0:
 		_dodge_t -= delta
-		vel = _dodge_dir * float(def.dodge.distance) / float(def.dodge.duration)
+		vel = _dodge_dir * _dash_dist
+		if _dodge_t <= 0.0:
+			_charging = false
 	velocity.x = vel.x
 	velocity.z = vel.z
 	if is_on_floor():
@@ -143,36 +166,53 @@ func _combat_input() -> void:
 	if not input_enabled:
 		_cancel_aim()
 		return
-	var muzzle := global_position + Vector3(0, 1.45, 0) + rig.right_flat() * 0.35
 	if Input.is_action_pressed("attack") and not attack_blocked:
-		var aim := rig.aim_point(sim, muzzle)
-		if sim.hero_attack(muzzle, aim - muzzle):
-			_recoil = 1.0
+		if sim.hero.def.attack.get("melee", false):
+			if sim.hero_attack(global_position + Vector3(0, 1.0, 0), rig.forward_flat()):
+				_recoil = 1.0
+		else:
+			var muzzle := global_position + Vector3(0, 1.45, 0) + rig.right_flat() * 0.35
+			var aim := rig.aim_point(sim, muzzle)
+			if sim.hero_attack(muzzle, aim - muzzle):
+				_recoil = 1.0
 	if Input.is_action_just_pressed("ability_1"):
-		_aiming_ability = "rain"
+		_aiming_ability = sim.ability_id(0)
 	elif Input.is_action_just_pressed("ability_2"):
-		_aiming_ability = "blast"
+		_aiming_ability = sim.ability_id(1)
 	if _aiming_ability != "" and Input.is_action_just_pressed("cancel"):
 		_aiming_ability = ""
-	match _aiming_ability:
-		"rain":
-			if Input.is_action_pressed("ability_1"):
-				_show_preview()
-			else:
-				_aiming_ability = ""
-				if not sim.hero_rain(rain_target()):
-					Sfx.play("deny", 0.3)
-		"blast":
-			if Input.is_action_pressed("ability_2"):
-				_show_preview()
-			else:
-				_aiming_ability = ""
-				if not sim.hero_blast(global_position, rig.forward_flat()):
-					Sfx.play("deny", 0.3)
-	_rain_preview.visible = _aiming_ability == "rain"
-	_blast_preview.visible = _aiming_ability == "blast"
+	if _aiming_ability != "":
+		var key := "ability_1" if _aiming_ability == sim.ability_id(0) else "ability_2"
+		if Input.is_action_pressed(key):
+			_show_preview()
+		else:
+			var id := _aiming_ability
+			_aiming_ability = ""
+			if not _cast(id):
+				Sfx.play("deny", 0.3)
+	_rain_preview.visible = _aiming_ability == "rain" or _aiming_ability == "slam"
+	_blast_preview.visible = _aiming_ability == "blast" or _aiming_ability == "charge"
 	if Input.is_action_just_pressed("interact"):
 		sim.hero_interact()
+
+
+func _cast(id: String) -> bool:
+	match id:
+		"rain":
+			return sim.hero_rain(rain_target())
+		"blast":
+			return sim.hero_blast(global_position, rig.forward_flat())
+		"slam":
+			if sim.hero_slam():
+				_cast_t = 0.5
+				return true
+		"charge":
+			if sim.hero_charge(rig.forward_flat()):
+				var c: Dictionary = sim.hero.def.charge
+				_dash(rig.forward_flat(), float(c.distance), float(c.duration))
+				_charging = true
+				return true
+	return false
 
 
 func _cancel_aim() -> void:
@@ -196,22 +236,36 @@ func rain_target() -> Vector3:
 
 func _show_preview() -> void:
 	var h := sim.hero
-	var ready := (h.rain_cd if _aiming_ability == "rain" else h.blast_cd) <= 0.0
+	var ready := (h.rain_cd if _aiming_ability == sim.ability_id(0) else h.blast_cd) <= 0.0
 	var col := Color(0.67, 1.0, 0.72) if ready else Color(1.0, 0.45, 0.4)
-	if _aiming_ability == "rain":
-		_rain_preview.global_position = rain_target() + Vector3(0, 0.08, 0)
-		_rain_preview.scale = Vector3.ONE * float(h.def.rain.radius)
-		for c: MeshInstance3D in _rain_preview.get_children():
-			var m := c.material_override as StandardMaterial3D
-			m.albedo_color = Color(col, m.albedo_color.a)
-	else:
-		if _blast_preview.mesh == null:
-			var b: Dictionary = h.def.blast
-			_blast_preview.mesh = cone_mesh(float(b.range), float(b.angle))
-		_blast_preview.global_position = global_position + Vector3(0, 0.1, 0)
-		_blast_preview.rotation = Vector3(0, rig.yaw, 0)
-		var bm := _blast_preview.material_override as StandardMaterial3D
-		bm.albedo_color = Color(col, bm.albedo_color.a)
+	match _aiming_ability:
+		"rain", "slam":
+			var at := rain_target() if _aiming_ability == "rain" else global_position
+			_rain_preview.global_position = at + Vector3(0, 0.08, 0)
+			_rain_preview.scale = Vector3.ONE * float(h.def[_aiming_ability].radius)
+			for c: MeshInstance3D in _rain_preview.get_children():
+				var m := c.material_override as StandardMaterial3D
+				m.albedo_color = Color(col, m.albedo_color.a)
+		_:
+			if _blast_preview.get_meta("for", "") != _aiming_ability:
+				var d: Dictionary = h.def[_aiming_ability]
+				_blast_preview.mesh = cone_mesh(float(d.range), float(d.angle)) if _aiming_ability == "blast" \
+						else lane_mesh(float(d.distance), float(d.width))
+				_blast_preview.set_meta("for", _aiming_ability)
+			_blast_preview.global_position = global_position + Vector3(0, 0.1, 0)
+			_blast_preview.rotation = Vector3(0, rig.yaw, 0)
+			var bm := _blast_preview.material_override as StandardMaterial3D
+			bm.albedo_color = Color(col, bm.albedo_color.a)
+
+
+## Flat rectangle for the charge lane (pointing along -Z).
+static func lane_mesh(length: float, width: float) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var w := width * 0.5
+	for v in [Vector3(-w, 0, 0), Vector3(w, 0, 0), Vector3(w, 0, -length), Vector3(-w, 0, 0), Vector3(w, 0, -length), Vector3(-w, 0, -length)]:
+		st.add_vertex(v)
+	return st.commit()
 
 
 func _animate(delta: float, move: Vector3) -> void:
@@ -223,11 +277,13 @@ func _animate(delta: float, move: Vector3) -> void:
 		model.rotation.y = lerp_angle(model.rotation.y, yaw, minf(1.0, delta * 14.0))
 	var speed := Vector2(velocity.x, velocity.z).length()
 	_recoil = maxf(0.0, _recoil - delta * 6.0)
+	_cast_t = maxf(0.0, _cast_t - delta)
 	if model.has_meta("anim"):
 		_animate_imported(speed)
 	else:
 		parts.body.position.y = 0.75 + absf(sin(_time * 10.0)) * 0.06 * minf(1.0, speed / 6.0)
-		parts.bow.position.z = -0.25 + _recoil * 0.12
+		if parts.has("bow"):
+			parts.bow.position.z = -0.25 + _recoil * 0.12
 		model.rotation.x = -TAU * (1.0 - _dodge_t / 0.32) if _dodge_t > 0.0 else 0.0
 	# Flicker while invulnerable after respawn.
 	model.visible = sim.hero.invuln_t <= 0.0 or _dodge_t > 0.0 or int(_time * 12.0) % 2 == 0
@@ -235,10 +291,14 @@ func _animate(delta: float, move: Vector3) -> void:
 
 ## Skeletal animation for the imported hero model.
 func _animate_imported(speed: float) -> void:
-	if _dodge_t > 0.0:
+	if _dodge_t > 0.0 and _charging:
+		Assets.play(model, "attack", 1.5, 0.05)
+	elif _dodge_t > 0.0:
 		Assets.play(model, "roll", 1.6, 0.05)
+	elif _cast_t > 0.0:
+		Assets.play(model, "cast", 1.4, 0.05)
 	elif _recoil > 0.0 or (input_enabled and Input.is_action_pressed("attack") and not attack_blocked):
-		Assets.play(model, "shoot", 2.0, 0.08)
+		Assets.play(model, "attack", 2.0, 0.08)
 	elif speed > 0.5:
 		Assets.play(model, "run", clampf(speed / 6.0, 0.6, 1.4))
 	else:

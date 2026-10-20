@@ -78,6 +78,7 @@ func _bind_display_sim() -> void:
 	sim = RunFlow.make_sim(run)
 	view.bind(sim)
 	hero.sim = sim
+	hero.set_hero(run.hero_id)
 	hero.place_at_spawn()
 	build.sim = sim
 	hud.build_hotbar(build.slots())
@@ -183,6 +184,7 @@ func _start_encounter() -> void:
 	sim = RunFlow.make_sim(run)
 	view.bind(sim)
 	hero.sim = sim
+	hero.set_hero(run.hero_id)
 	hero.place_at_spawn()
 	build.sim = sim
 	build.cancel()

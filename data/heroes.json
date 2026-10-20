@@ -1,11 +1,22 @@
 {
 	"ranger": {
 		"name_key": "H_RANGER", "desc_key": "H_RANGER_DESC", "hp": 110, "speed": 7.2, "regen": 2.0,
+		"abilities": ["rain", "blast"],
 		"attack": { "damage": 13.0, "interval": 0.42, "speed": 55.0, "range": 45.0, "crit": 0.1 },
 		"dodge": { "distance": 6.0, "duration": 0.32, "cooldown": 1.4 },
 		"rain": { "radius": 4.2, "damage": 9.0, "hits": 8, "duration": 2.0, "cooldown": 11.0 },
 		"blast": { "range": 6.5, "angle": 70.0, "damage": 16.0, "push": 5.0, "cooldown": 8.0 },
 		"xp_curve": [40, 90, 160, 250, 360, 500, 680],
 		"level_bonus": { "damage": 0.1, "hp": 12 }
+	},
+	"warrior": {
+		"name_key": "H_WARRIOR", "desc_key": "H_WARRIOR_DESC", "hp": 170, "speed": 6.6, "regen": 3.0,
+		"abilities": ["slam", "charge"], "unlock": "warrior",
+		"attack": { "melee": true, "damage": 24.0, "interval": 0.55, "range": 3.2, "angle": 140.0, "crit": 0.1 },
+		"dodge": { "distance": 6.0, "duration": 0.32, "cooldown": 1.4 },
+		"slam": { "radius": 4.5, "damage": 28.0, "stun": 1.4, "cooldown": 10.0 },
+		"charge": { "distance": 8.0, "width": 2.6, "duration": 0.3, "damage": 20.0, "push": 4.0, "cooldown": 8.0 },
+		"xp_curve": [40, 90, 160, 250, 360, 500, 680],
+		"level_bonus": { "damage": 0.1, "hp": 18 }
 	}
 }

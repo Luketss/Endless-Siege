@@ -2,7 +2,7 @@ extends SceneTree
 ## Captures screenshots for visual review / store page drafts (needs a display):
 ##   xvfb-run -s "-screen 0 1920x1080x24" godot --path . --resolution 1920x1080 \
 ##       --rendering-method gl_compatibility --rendering-driver opengl3 --script res://tools/screenshot.gd
-## Env: SHOT_DIR (default user://shots), SHOT_LANG (pt/en).
+## Env: SHOT_DIR (default user://shots), SHOT_LANG (pt/en), SHOT_HERO (ranger/warrior).
 
 var out_dir := ""
 
@@ -42,7 +42,8 @@ func _run() -> void:
 	menu.queue_free()
 	await _frames(2)
 
-	var run := RunState.create(777, "ranger", [], ["banner", "tar"])
+	var hero_id := OS.get_environment("SHOT_HERO") if OS.get_environment("SHOT_HERO") != "" else "ranger"
+	var run := RunState.create(777, hero_id, [], ["banner", "tar"])
 	for id in ["sharpened_arrows", "shatter", "deep_freeze", "incendiary_shells"]:
 		run.add_upgrade(id)
 	run.gold = 1400
