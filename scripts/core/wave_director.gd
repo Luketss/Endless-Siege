@@ -12,7 +12,7 @@ const GROUP := {"grunt": [4, 8], "runner": [3, 5], "wisp": [2, 4], "brute": [1, 
 
 
 static func budget(depth: int, wave_index: int, mods: RunMods, kind: String) -> float:
-	var b := 12.0 * (1.0 + 0.45 * depth) * (1.0 + 0.35 * wave_index)
+	var b := 13.0 * (1.0 + 0.7 * depth) * (1.0 + 0.4 * wave_index)
 	if kind == "elite":
 		b *= 1.15
 	return b * maxf(0.3, 1.0 + mods.stat("enemy_count_pct"))

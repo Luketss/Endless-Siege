@@ -114,7 +114,7 @@ func test_gold_on_kill_and_bounty() -> void:
 	var sim := make_sim(0, ["bounty_hunter"])
 	var e := sim.spawn_enemy("grunt")
 	sim.damage_enemy(e, 9999.0, "ice", -1, 0.0)
-	check_eq(sim.gold, int(round(4 * 1.25)))
+	check_eq(sim.gold, int(round(float(DataDB.enemy("grunt").gold) * 1.25)))
 
 
 func test_wave_clear_gives_bonus_and_cache() -> void:
@@ -125,7 +125,7 @@ func test_wave_clear_gives_bonus_and_cache() -> void:
 		sim.damage_enemy(e, 9999.0, "ice", -1, 0.0)
 	sim.step(DT)
 	check(not sim.wave_active, "wave cleared")
-	check(sim.gold >= 45 + 4, "kill + clear bonus")
+	check(sim.gold >= int(DataDB.balance().wave_clear_gold) + int(DataDB.enemy("grunt").gold), "kill + clear bonus")
 	check(not sim.cache.is_empty(), "supply cache spawned")
 	var g := sim.gold
 	sim.hero.pos = sim.cache.pos

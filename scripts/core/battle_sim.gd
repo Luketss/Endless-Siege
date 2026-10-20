@@ -270,7 +270,7 @@ func spawn_enemy(type: String, elite: bool = false, s0: float = 0.0, lateral: fl
 	e.def = def
 	e.boss = def.get("boss", false)
 	e.flying = def.get("flying", false)
-	e.max_hp = float(def.hp) * (1.0 + 0.12 * depth)
+	e.max_hp = float(def.hp) * (1.0 + float(balance.get("enemy_hp_per_depth", 0.12)) * depth)
 	e.armor = float(def.get("armor", 0))
 	e.speed = float(def.speed) * (1.0 + mods.stat("enemy_speed_pct"))
 	e.size = float(def.size)
@@ -693,7 +693,7 @@ func _fire(st: Units.Structure, target: Units.Enemy) -> void:
 			p.pierce = int(mods.flag("pierce"))
 			p.ttl = (tower_range(st) + 4.0) / p.speed
 	projectiles.append(p)
-	emit({"type": "fire", "id": st.id, "structure": st.type, "pos": p.pos})
+	emit({"type": "fire", "id": st.id, "structure": st.type, "pos": p.pos, "target": target.pos})
 	var every := int(mods.flag("overcharge"))
 	if every > 0 and tower_shots % every == 0:
 		emit({"type": "synergy", "name": "SYN_FX_OVERCHARGE", "pos": target.pos})
