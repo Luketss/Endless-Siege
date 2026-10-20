@@ -163,3 +163,34 @@ func test_run_log_records_decisions() -> void:
 	check_eq(all.size(), 2, "two journeys appended")
 	check_eq(all[0].seed, 21)
 	DirAccess.remove_absolute(path)
+
+
+func _attack_setup() -> Array:
+	var sim := make_sim()
+	var e := sim.spawn_enemy("brute", false, 20.0, 0.0)
+	sim.hero.pos = e.pos
+	sim.step(DT)
+	return [sim, e]
+
+
+func test_enemy_attack_has_windup() -> void:
+	var setup := _attack_setup()
+	var sim: BattleSim = setup[0]
+	var e: Units.Enemy = setup[1]
+	check(e.attack_t > 0.0, "windup started")
+	check(sim.events.any(func(ev): return ev.type == "enemy_attack"), "telegraph event")
+	check_eq(sim.hero.hp, sim.hero.max_hp, "no damage at windup start")
+	for i in 40:
+		sim.hero.pos = e.pos
+		sim.step(DT)
+	check(sim.hero.hp < sim.hero.max_hp, "hit lands after the windup")
+
+
+func test_stepping_away_avoids_enemy_attack() -> void:
+	var setup := _attack_setup()
+	var sim: BattleSim = setup[0]
+	var e: Units.Enemy = setup[1]
+	sim.hero.pos = e.pos + Vector3(6, 0, 0)
+	run(sim, 0.6)
+	check_eq(sim.hero.hp, sim.hero.max_hp, "out of reach when the windup ends")
+	check(e.contact_cd > 0.0, "attack spent")

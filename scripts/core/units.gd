@@ -36,6 +36,7 @@ class Enemy:
 	var in_tar: float = 0.0
 	var shielded: float = 0.0
 	var contact_cd: float = 0.0
+	var attack_t: float = 0.0  # melee windup on the hero; hits when it reaches 0
 	var ability_t: float = 0.0
 	var summon_t: float = 0.0
 	var phase: int = 0

@@ -10,6 +10,7 @@ extends RefCounted
 const HERO := -100
 const GRID := 4.0
 const FLY_HEIGHT := 3.6
+const ATTACK_WINDUP := 0.4
 
 var map: MapDef
 var mods: RunMods
@@ -401,6 +402,8 @@ func _update_enemies(dt: float) -> void:
 
 func _update_status(e: Units.Enemy, dt: float) -> void:
 	e.contact_cd = maxf(0.0, e.contact_cd - dt)
+	if e.attack_t > 0.0:
+		_resolve_attack(e, dt)
 	if e.chill_t > 0.0:
 		e.chill_t -= dt
 		e.chill_accum += dt
@@ -537,7 +540,7 @@ func damage_enemy(e: Units.Enemy, amount: float, dtype: String, source: int, cri
 	if st:
 		st.damage_done += amount
 	if not opts.get("tick", false):
-		emit({"type": "hit", "pos": e.pos, "amount": amount, "crit": crit, "dtype": dtype})
+		emit({"type": "hit", "id": e.id, "pos": e.pos, "amount": amount, "crit": crit, "dtype": dtype, "hero": source == HERO})
 	if crit and not opts.get("no_proc", false) and mods.flag("crit_explosion") > 0.0:
 		aoe(e.pos, 2.6, amount * mods.flag("crit_explosion"), "fire", source, 0.0, {"no_proc": true, "fx": "crit_burst"})
 		emit({"type": "synergy", "name": "SYN_FX_CRIT_BURST", "pos": e.pos})
@@ -1103,9 +1106,29 @@ func _update_hero(dt: float) -> void:
 		var contact := float(e.def.get("contact", 0))
 		if contact <= 0.0 or e.contact_cd > 0.0 or e.launched_t > 0.0:
 			continue
-		if Vector2(e.pos.x, e.pos.z).distance_to(Vector2(hero.pos.x, hero.pos.z)) <= e.size + 0.6:
-			e.contact_cd = 1.0
-			damage_hero(contact * (1.5 if e.elite else 1.0))
+		if e.attack_t <= 0.0 and e.frozen_t <= 0.0 and _hero_dist(e) <= e.size + 0.6:
+			e.attack_t = ATTACK_WINDUP
+			emit({"type": "enemy_attack", "id": e.id, "pos": e.pos})
+
+
+func _hero_dist(e: Units.Enemy) -> float:
+	return Vector2(e.pos.x, e.pos.z).distance_to(Vector2(hero.pos.x, hero.pos.z))
+
+
+## Melee windup: the hit lands only if the hero is still in reach when it ends,
+## so stepping away or dodging during the telegraph avoids the damage.
+func _resolve_attack(e: Units.Enemy, dt: float) -> void:
+	if e.frozen_t > 0.0 or e.launched_t > 0.0:
+		e.attack_t = 0.0
+		e.contact_cd = 0.5
+		return
+	e.attack_t -= dt
+	if e.attack_t > 0.0:
+		return
+	e.attack_t = 0.0
+	e.contact_cd = 1.2
+	if hero.alive and _hero_dist(e) <= e.size + 1.1:
+		damage_hero(float(e.def.get("contact", 0)) * (1.5 if e.elite else 1.0))
 
 
 # ================================================================ cleanup

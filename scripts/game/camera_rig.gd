@@ -16,6 +16,7 @@ var overview_center := Vector3.ZERO
 var spring: SpringArm3D
 var camera: Camera3D
 var _shoulder := Vector3(1.1, 0.0, 0.0)
+var _trauma := 0.0
 
 
 func _ready() -> void:
@@ -55,7 +56,22 @@ func _unhandled_input(event: InputEvent) -> void:
 		distance = clampf(distance + 0.8, 3.5, 14.0)
 
 
+## Adds screen shake (0..1, decays; the offset grows with the square of trauma).
+func add_shake(amount: float) -> void:
+	if Settings.get_value("screen_shake"):
+		_trauma = minf(1.0, _trauma + amount)
+
+
+func _apply_shake(delta: float) -> void:
+	_trauma = maxf(0.0, _trauma - delta * 1.8)
+	var k := _trauma * _trauma
+	var t := Time.get_ticks_msec() / 1000.0
+	camera.h_offset = k * 0.35 * sin(t * 47.0)
+	camera.v_offset = k * 0.35 * sin(t * 53.0 + 1.7)
+
+
 func _process(delta: float) -> void:
+	_apply_shake(delta)
 	if overview:
 		yaw += delta * 0.06
 		global_position = global_position.lerp(overview_center + Vector3(0, 6, 0), minf(1.0, delta * 2.0))

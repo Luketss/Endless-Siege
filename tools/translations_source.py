@@ -162,7 +162,7 @@ S = {
  "SET_MASTER": ("Master volume", "Volume geral"), "SET_MUSIC": ("Music", "Música"), "SET_SFX": ("Effects", "Efeitos"),
  "SET_SENSITIVITY": ("Mouse sensitivity", "Sensibilidade do mouse"), "SET_INVERT": ("Invert Y axis", "Inverter eixo Y"),
  "SET_PRESS_KEY": ("Press a key…", "Pressione uma tecla…"), "SET_RESET_KEYS": ("Reset key bindings", "Restaurar teclas padrão"),
- "SET_LANGUAGE": ("Language", "Idioma"), "SET_DAMAGE_NUMBERS": ("Damage numbers", "Números de dano"),
+ "SET_LANGUAGE": ("Language", "Idioma"), "SET_DAMAGE_NUMBERS": ("Damage numbers", "Números de dano"), "SET_SCREEN_SHAKE": ("Screen shake", "Tremor de tela"),
  "SET_RUN_LOG": ("Save local play log", "Salvar registro local de partidas"),
  "SET_RUN_LOG_HINT": ("Each finished journey is appended to %s (offline, never sent anywhere). Playtesters can share this file to help balance the game.", "Cada jornada terminada é adicionada a %s (offline, nunca é enviado). Testadores podem compartilhar este arquivo para ajudar no balanceamento."),
  "ACTION_MOVE_FORWARD": ("Move forward", "Mover para frente"), "ACTION_MOVE_BACK": ("Move back", "Mover para trás"),

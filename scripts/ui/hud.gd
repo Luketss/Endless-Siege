@@ -25,6 +25,17 @@ var _crosshair: Control
 var _center_label: Label
 var _toasts: VBoxContainer
 var _hint: Label
+var _vignette: ColorRect
+var _hurt := 0.0
+
+const VIGNETTE_SHADER := """
+shader_type canvas_item;
+uniform float strength = 0.0;
+void fragment() {
+	float d = distance(UV, vec2(0.5)) * 1.41;
+	COLOR = vec4(0.75, 0.02, 0.02, smoothstep(0.45, 1.0, d) * strength);
+}
+"""
 
 
 func _ready() -> void:
@@ -44,6 +55,15 @@ func _panel(parent: Control, preset: int, offset := Vector2.ZERO) -> PanelContai
 
 
 func _build() -> void:
+	# Red edge vignette when the hero is hit or low on health (under everything else).
+	_vignette = ColorRect.new()
+	_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mat := ShaderMaterial.new()
+	mat.shader = Shader.new()
+	mat.shader.code = VIGNETTE_SHADER
+	_vignette.material = mat
+	add_child(_vignette)
+	_vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	# Top-left: core and gold.
 	var tl := _panel(self, Control.PRESET_TOP_LEFT, Vector2(20, 20))
 	var v := VBoxContainer.new()
@@ -162,6 +182,21 @@ func _build() -> void:
 	_center_label.position.y += 70
 
 
+## Pulses the damage vignette; `ratio` is the hit size relative to max health.
+func flash_damage(ratio: float) -> void:
+	_hurt = clampf(_hurt + 0.45 + ratio * 2.0, 0.0, 1.0)
+
+
+func _update_vignette(sim: BattleSim) -> void:
+	_hurt = maxf(0.0, _hurt - get_process_delta_time() * 1.6)
+	var low := 0.0
+	if sim.hero.alive and sim.hero.hp < sim.hero.max_hp * 0.3:
+		low = 0.25 + 0.12 * sin(Time.get_ticks_msec() / 160.0)
+	var s := maxf(_hurt, low)
+	_vignette.visible = s > 0.01
+	(_vignette.material as ShaderMaterial).set_shader_parameter("strength", s)
+
+
 func build_hotbar(slots: Array[String]) -> void:
 	for c in _hotbar.get_children():
 		c.queue_free()
@@ -206,6 +241,7 @@ func toast(text: String, color: Color = UITheme.TEXT) -> void:
 
 ## state: {"title", "wave", "waves", "phase": "build"|"wave"|"idle", "speed": float}
 func refresh(sim: BattleSim, state: Dictionary, build: BuildController) -> void:
+	_update_vignette(sim)
 	_crosshair.visible = state.get("captured", true)
 	_core_label.text = "%s  %d / %d" % [tr("HUD_CORE"), int(ceil(sim.core_hp)), int(sim.core_max)]
 	_core_bar.max_value = sim.core_max

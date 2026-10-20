@@ -137,6 +137,7 @@ func _game_tab() -> Control:
 	_row(v, tr("SET_LANGUAGE"), _option([["auto", tr("LANG_AUTO")], ["pt", "Português"], ["en", "English"]],
 		Settings.get_value("language"), func(val): Settings.set_value("language", val)))
 	_row(v, tr("SET_DAMAGE_NUMBERS"), _check("damage_numbers"))
+	_row(v, tr("SET_SCREEN_SHAKE"), _check("screen_shake"))
 	_row(v, tr("SET_RUN_LOG"), _check("run_log"))
 	var hint := UITheme.label(tr("SET_RUN_LOG_HINT") % ProjectSettings.globalize_path(RunLog.PATH), "Dim")
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

@@ -23,6 +23,7 @@ var wave_index := 0
 var phase := "idle"  # idle | build | wave | done
 var speed_index := 0
 var _acc := 0.0
+var _hitstop := 0.0
 var _paused := false
 var _tutorial_step := -1
 
@@ -224,7 +225,11 @@ func _process(delta: float) -> void:
 		return
 	_handle_input()
 	if not _paused:
-		_acc += minf(delta, 0.1) * SPEEDS[speed_index]
+		var scale: float = SPEEDS[speed_index]
+		if _hitstop > 0.0:
+			_hitstop -= delta
+			scale *= 0.08
+		_acc += minf(delta, 0.1) * scale
 		var steps := 0
 		while _acc >= STEP and steps < 12:
 			sim.step(STEP)
@@ -281,6 +286,19 @@ func _start_wave() -> void:
 func _on_event(e: Dictionary) -> void:
 	view.handle_event(e)
 	match e.type:
+		"hit":
+			if e.crit and e.hero:
+				_hitstop = 0.06
+		"hero_hit":
+			rig.add_shake(0.35)
+			hud.flash_damage(float(e.amount) / maxf(1.0, sim.hero.max_hp))
+		"stomp":
+			rig.add_shake(0.6 if hero.global_position.distance_to(e.pos) < 18.0 else 0.25)
+		"explosion":
+			if hero.global_position.distance_to(e.pos) < 7.0:
+				rig.add_shake(0.12)
+		"leak":
+			rig.add_shake(0.2)
 		"wave_cleared":
 			wave_index += 1
 			Sfx.play("wave_clear")
@@ -293,6 +311,7 @@ func _on_event(e: Dictionary) -> void:
 		"defeat":
 			_encounter_lost()
 		"boss_phase":
+			rig.add_shake(0.7)
 			hud.toast(tr("HUD_BOSS_PHASE") % (int(e.phase) + 1), Color("ff7a2a"))
 		"level_up":
 			hud.toast(tr("HUD_LEVEL_UP") % int(e.level), Color("b26bff"))

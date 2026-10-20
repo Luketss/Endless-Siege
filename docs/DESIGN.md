@@ -63,6 +63,8 @@ A vida cresce 60% por camada e o orçamento das ondas 70% por camada e 40% por o
 
 Ganha XP com abates e sobe de nível (+10% de dano e +12 de vida por nível), mantendo o nível durante a jornada.
 
+Inimigos que encostam nela atacam com uma preparação de 0,4 s (animação de golpe e anel vermelho no chão). O dano só sai se ela continuar ao alcance no fim da preparação, então se afastar ou esquivar evita o golpe; depois o inimigo espera 1,2 s para atacar de novo.
+
 ## Melhorias (28)
 
 | Raridade | Melhorias |
