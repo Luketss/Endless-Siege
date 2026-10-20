@@ -26,6 +26,8 @@ var stats: Dictionary = {"waves": 0, "combats": 0, "elites": 0, "boss": 0, "kill
 ## Hero progression within the run.
 var hero_level: int = 1
 var hero_xp: float = 0.0
+## Endless siege after the boss: current round (0 = not in endless mode).
+var endless_round: int = 0
 
 
 static func create(p_seed: int, p_hero: String, p_modifiers: Array, p_unlocks: Array, p_map: String = "forest") -> RunState:
@@ -55,6 +57,8 @@ func node_seed(node_id: String, salt: String = "") -> int:
 
 
 func depth() -> int:
+	if endless_round > 0:
+		return int(DataDB.journey().layers) - 1 + endless_round
 	var node := Journey.find(journey, current_node)
 	return int(node.get("layer", 0))
 
@@ -75,6 +79,7 @@ func to_dict() -> Dictionary:
 		"unlocks": unlocks, "gold": gold, "core_hp": core_hp, "upgrades": upgrades, "journey": journey,
 		"current_node": current_node, "visited": visited, "structures": structures, "harder_next": harder_next,
 		"finished": finished, "victory": victory, "stats": stats, "hero_level": hero_level, "hero_xp": hero_xp, "log": history,
+		"endless_round": endless_round,
 	}
 
 
@@ -101,7 +106,13 @@ static func from_dict(d: Dictionary) -> RunState:
 	r.hero_level = int(d.get("hero_level", 1))
 	r.hero_xp = float(d.get("hero_xp", 0.0))
 	r.history = d.get("log", [])
+	r.endless_round = int(d.get("endless_round", 0))
 	return r
+
+
+## Rounds survived in the endless siege.
+func endless_cleared() -> int:
+	return maxi(0, endless_round - 1)
 
 
 ## Essence (permanent currency) earned by this run.

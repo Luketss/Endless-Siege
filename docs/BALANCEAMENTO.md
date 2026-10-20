@@ -41,4 +41,12 @@ python3 tools/run_report.py runs_ana.jsonl runs_bruno.jsonl   # junta arquivos d
 SIM_LOG=sim.jsonl godot --headless --path . --script res://tools/balance_sim.gd   # mesmo formato a partir da simulação
 ```
 
+### Cerco infinito
+
+`SIM_ENDLESS=1` faz os vencedores seguirem para o cerco infinito.
+
+1. Na primeira versão, o ouro crescia com o número de inimigos (de 2.800 para 11.800 em duas rodadas). O forte enchia o mapa (84 estruturas) e não tomava mais dano nem na profundidade 20.
+2. Com a renda presa ao nível do chefe e a vida dos inimigos crescendo 12% por rodada, o autopiloto sobrevive a **4 rodadas** em todas as jornadas vencidas medidas e cai no chefe da 5ª.
+3. Com 18% de crescimento, ele caía já na 3ª rodada.
+
 O relatório mostra a taxa de vitória, onde as derrotas acontecem, a taxa de escolha de cada melhoria (escolhida ÷ oferecida, útil para achar cartas fracas ou dominantes), a perda média de núcleo e o tempo por etapa, e a participação de cada fonte no dano.

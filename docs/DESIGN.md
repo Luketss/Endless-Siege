@@ -141,3 +141,15 @@ A combinação natural é Nova e logo depois Corrente: os alvos resfriados receb
 
 Cada mapa define seu bioma em `data/maps/*.json`, e as cores, o céu e os adereços de cada bioma ficam em `data/visuals.json` → `biomes`. Um teste valida todos os mapas: estrada dentro dos limites e terminando no núcleo, obstáculos, muros e platôs fora da estrada, e trechos paralelos com espaço para torres.
 
+## Cerco infinito
+
+Ao derrotar o chefe, o jogador escolhe entre terminar a jornada ou seguir para o **cerco infinito**, com as mesmas defesas, o mesmo ouro e o mesmo herói:
+
+- O núcleo é reparado em 30% (`endless_heal_pct`).
+- Cada rodada tem 3 ondas. Toda 3ª rodada é de elite e toda 5ª tem chefe.
+- A profundidade continua crescendo depois da última camada. O orçamento de ondas sobe 25% a mais por rodada (`endless_ramp`), e a vida dos inimigos é multiplicada por 1,12 a cada rodada (`endless_hp_growth`), então o cerco acaba vencendo.
+- A renda (abates, fim de onda, suprimentos) é reduzida para o nível do chefe (`BattleSim.income_mult`). Sem isso, o ouro crescia junto com o número de inimigos e o forte crescia sem limite.
+- Depois de cada rodada há uma escolha de melhoria. O progresso é salvo entre rodadas.
+- A jornada continua contando como vitória. As ondas extras rendem essência normalmente.
+- O recorde de rodadas por herói e mapa fica no perfil e aparece na oferta e no resultado. Duas conquistas cobrem 5 e 15 rodadas.
+

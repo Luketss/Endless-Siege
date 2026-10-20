@@ -204,6 +204,24 @@ func test_mage_in_battle() -> void:
 	await _frames(2)
 
 
+func test_endless_round_flow() -> void:
+	var profile: Node = get_tree().root.get_node("Profile")
+	var run := RunState.create(96, "ranger", [], [])
+	run.victory = true
+	RunFlow.start_endless(run)
+	profile.active_run = run
+	var g := await _open("res://scenes/game.tscn")
+	await _frames(4)
+	check(g.overlay != null and not (g.overlay is JourneyPanel), "endless shows the round dialog, not the journey map")
+	g.node = RunFlow.endless_node(run)
+	g._start_encounter()
+	await _frames(4)
+	check(g.phase == "build" and g.sim.depth == run.depth(), "endless round starts at the endless depth")
+	check(g.sim.enemy_hp_mult > 1.0 and g.sim.income_mult < 1.0, "endless scaling applied")
+	g.queue_free()
+	await _frames(2)
+
+
 func _physics(n: int) -> void:
 	for i in n:
 		await get_tree().physics_frame

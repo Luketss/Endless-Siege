@@ -18,6 +18,7 @@ static func record(run: RunState) -> Dictionary:
 		"seed": run.run_seed,
 		"hero": run.hero_id,
 		"map": run.map_id,
+		"endless_rounds": run.endless_cleared(),
 		"modifiers": run.modifiers,
 		"unlocks": run.unlocks,
 		"victory": run.victory,

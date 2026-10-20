@@ -3,7 +3,7 @@ extends SceneTree
 ##   godot --headless --path . --script res://tools/balance_sim.gd
 ## Env: SIM_RUNS (default 12), SIM_MODS (comma separated challenge ids),
 ##      SIM_LOG (path: also write runs.jsonl records, readable by tools/run_report.py),
-##      SIM_MAP (map id, default forest).
+##      SIM_MAP (map id, default forest), SIM_ENDLESS=1 (winners continue into the endless siege).
 ## The autopilot does not use the hero, so it is a "floor": a human should do better.
 
 
@@ -17,9 +17,13 @@ func _initialize() -> void:
 	var deaths := {}
 	var core_before_boss := []
 	var gold_left := []
+	var endless := []
 	var t0 := Time.get_ticks_msec()
 	for i in n:
 		var run := Autopilot.play_journey(1000 + i, ["banner", "tar", "legendary_pool"], mods, map_id)
+		if run.victory and OS.get_environment("SIM_ENDLESS") == "1":
+			Autopilot.play_endless(run, 1000 + i)
+			endless.append(run.endless_cleared())
 		if OS.get_environment("SIM_LOG") != "":
 			RunLog.append(run, OS.get_environment("SIM_LOG"))
 		if run.victory:
@@ -35,5 +39,7 @@ func _initialize() -> void:
 			run.depth(), int(run.stats.waves), int(run.stats.kills), run.upgrades.size(), run.core_hp])
 	print("\nwin rate: %d/%d (%.0f%%)   avg layer reached: %.1f / 6" % [wins, n, 100.0 * wins / n, float(depth_sum) / n])
 	print("losses by encounter: ", deaths)
+	if not endless.is_empty():
+		print("endless rounds survived by winners: ", endless)
 	print("simulated in %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
 	quit()

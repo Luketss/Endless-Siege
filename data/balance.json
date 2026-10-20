@@ -13,5 +13,8 @@
 	"rarity_weights": { "common": 60, "rare": 28, "epic": 10, "legendary": 2 },
 	"shop": { "prices": { "common": 70, "rare": 120, "epic": 190, "legendary": 280 }, "repair_cost": 60, "repair_amount": 30 },
 	"rest_heal_pct": 0.4,
+	"endless_heal_pct": 0.3,
+	"endless_ramp": 0.25,
+	"endless_hp_growth": 1.12,
 	"essence": { "per_wave": 1, "per_combat": 4, "per_elite": 8, "per_boss": 30, "victory_bonus": 20 }
 }

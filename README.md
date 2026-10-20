@@ -14,7 +14,7 @@ Feito em **Godot 4.3** (GDScript). Personagens, inimigos, torres e cenário usam
 
 | # | Item | Status |
 |---|---|---|
-| 1 | Um mapa funcional | ✅ Floresta Corrompida: estrada sinuosa, platôs com rampa (+20% de alcance), obstáculos que bloqueiam a linha de visão, muralhas |
+| 1 | Um mapa funcional | ✅ Floresta Corrompida e Passo Congelado (desbloqueável, bioma de neve): estrada sinuosa, platôs com rampa (+20% de alcance), obstáculos que bloqueiam a linha de visão, muralhas |
 | 2 | Heróis controláveis | ✅ Maga elemental e Guerreiro corpo a corpo (desbloqueáveis) e Patrulheira: WASD, câmera no ombro, tiro com mira assistida, Chuva de Flechas (Q), Rajada Concussiva (E), esquiva (Espaço), interação (F), níveis na jornada |
 | 3 | Três torres | ✅ Flechas, Canhão, Pináculo Gélido, mais o Estandarte de Guerra (suporte, desbloqueável) |
 | 4 | Duas armadilhas | ✅ Espinhos, Placa de Mola (empurrão), mais o Poço de Piche (óleo/lentidão, desbloqueável) |
@@ -29,8 +29,9 @@ Feito em **Godot 4.3** (GDScript). Personagens, inimigos, torres e cenário usam
 | 13 | Tela inicial, pausa, configurações, resultado | ✅ Inclui remapeamento de teclas, modos de janela, resolução, escala da interface, volumes, qualidade de efeitos e idioma PT/EN |
 | 14 | Save e progressão permanente | ✅ Essência e desbloqueios no Santuário, desafios opcionais, jornada salva entre encontros, saves com checksum e backup |
 | 15 | Partida completa do início ao fim | ✅ Coberta por testes automatizados (jornadas inteiras simuladas) e testes de cena |
+| + | Além do MVP | Cerco infinito depois do chefe (com recorde), 12 conquistas (ponte opcional para a Steam), controle/Steam Deck, tutorial interativo, sons CC0 gravados |
 
-O que ainda falta (identidade visual própria, áudio gravado, integração com o Steamworks, testes com jogadores, outros heróis) está em [docs/FASES.md](docs/FASES.md).
+O que ainda falta (identidade visual própria, música gravada, ativar o GodotSteam com o App ID, testes com jogadores e em Steam Deck real) está em [docs/FASES.md](docs/FASES.md).
 
 ## Como jogar (desenvolvimento)
 
@@ -67,7 +68,7 @@ Os menus funcionam com D-pad, A e B. As dicas na tela trocam para os botões do 
 ## Testes e ferramentas
 
 ```bash
-GODOT=/caminho/godot tools/run_tests.sh             # 80 testes headless (regras, IA, cenas, input, assets)
+GODOT=/caminho/godot tools/run_tests.sh             # 82 testes headless (regras, IA, cenas, input, assets)
 python3 tools/check_translations.py                 # todas as chaves de texto existem em PT/EN
 godot --headless --path . --script res://tools/balance_sim.gd   # jornadas simuladas (balanceamento)
 GODOT=/caminho/godot tools/export_all.sh            # builds de Windows e Linux em build/

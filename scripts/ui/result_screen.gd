@@ -26,7 +26,13 @@ func _ready() -> void:
 		var title := UITheme.label(tr("RESULT_VICTORY") if run.victory else tr("RESULT_DEFEAT"), "Title", HORIZONTAL_ALIGNMENT_CENTER)
 		title.add_theme_color_override("font_color", UITheme.GOOD if run.victory else UITheme.BAD)
 		v.add_child(title)
-		v.add_child(UITheme.label(tr("RESULT_REACHED") % [run.depth() + 1, run.journey.layers.size()], "Dim", HORIZONTAL_ALIGNMENT_CENTER))
+		if run.endless_round > 0:
+			var best := int(Profile.data.get("endless_best", {}).get("%s|%s" % [run.hero_id, run.map_id], 0))
+			var el := UITheme.label(tr("RESULT_ENDLESS") % [run.endless_cleared(), best], "Header", HORIZONTAL_ALIGNMENT_CENTER)
+			el.add_theme_color_override("font_color", UITheme.GOLD)
+			v.add_child(el)
+		else:
+			v.add_child(UITheme.label(tr("RESULT_REACHED") % [run.depth() + 1, run.journey.layers.size()], "Dim", HORIZONTAL_ALIGNMENT_CENTER))
 		var h := HBoxContainer.new()
 		h.add_theme_constant_override("separation", 40)
 		v.add_child(h)

@@ -29,6 +29,10 @@ var gold: int = 0
 var core_hp: float = 100.0
 var core_max: float = 100.0
 var depth: int = 0
+## Scales gold from kills, wave clears and caches (the endless siege keeps income flat).
+var income_mult: float = 1.0
+## Extra enemy health (the endless siege grows it every round).
+var enemy_hp_mult: float = 1.0
 var time: float = 0.0
 var next_id: int = 1
 var spawn_queue: Array = []
@@ -271,7 +275,7 @@ func spawn_enemy(type: String, elite: bool = false, s0: float = 0.0, lateral: fl
 	e.def = def
 	e.boss = def.get("boss", false)
 	e.flying = def.get("flying", false)
-	e.max_hp = float(def.hp) * (1.0 + float(balance.get("enemy_hp_per_depth", 0.12)) * depth)
+	e.max_hp = float(def.hp) * (1.0 + float(balance.get("enemy_hp_per_depth", 0.12)) * depth) * enemy_hp_mult
 	e.armor = float(def.get("armor", 0))
 	e.speed = float(def.speed) * (1.0 + mods.stat("enemy_speed_pct"))
 	e.size = float(def.size)
@@ -559,7 +563,7 @@ func _kill(e: Units.Enemy, source: int) -> void:
 	if not e.alive:
 		return
 	e.alive = false
-	var g := int(round(e.gold * maxf(0.0, 1.0 + mods.stat("gold_kill_pct"))))
+	var g := int(round(e.gold * maxf(0.0, 1.0 + mods.stat("gold_kill_pct")) * income_mult))
 	gold += g
 	stats.gold_earned += g
 	stats.kills += 1
@@ -1273,7 +1277,7 @@ func _cleanup() -> void:
 	if wave_active and spawn_queue.is_empty() and enemies.is_empty() and not defeated:
 		wave_active = false
 		var bonus := int(round((float(balance.wave_clear_gold) + float(balance.wave_clear_gold_per_depth) * depth)
-				* maxf(0.0, 1.0 + mods.stat("wave_gold_pct"))))
+				* maxf(0.0, 1.0 + mods.stat("wave_gold_pct")) * income_mult))
 		gold += bonus
 		stats.gold_earned += bonus
 		_spawn_cache()
@@ -1289,6 +1293,6 @@ func _spawn_cache() -> void:
 			continue
 		if p.distance_to(map.core_pos) > 26.0:
 			continue
-		cache = {"pos": map.to_3d(p), "gold": 20 + 6 * depth}
+		cache = {"pos": map.to_3d(p), "gold": int(round((20 + 6 * depth) * income_mult))}
 		emit({"type": "cache_spawned", "pos": cache.pos})
 		return

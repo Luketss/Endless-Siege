@@ -7,10 +7,17 @@ extends RefCounted
 static func make_sim(run: RunState) -> BattleSim:
 	var sim := BattleSim.new()
 	var map := MapDef.from_dict(DataDB.map(run.map_id))
-	var node := Journey.find(run.journey, run.current_node)
 	sim.setup(map, run.mods(), run.gold, run.core_hp, run.core_max(), run.hero_id,
 		run.node_seed(run.current_node, "battle"), run.unlocks)
-	sim.depth = int(node.get("layer", 0))
+	sim.depth = run.depth()
+	if run.endless_round > 0:
+		# Enemy count grows every round; scale gold back to the boss-level income so the
+		# fort cannot snowball forever.
+		var last := float(DataDB.journey().layers) - 1.0
+		var ramp := float(DataDB.balance().get("endless_ramp", 0.0))
+		sim.income_mult = (1.0 + 0.7 * last) / ((1.0 + 0.7 * run.depth()) * (1.0 + ramp * run.endless_round))
+		# Defences eventually fill the map, so enemy health compounds to end the siege.
+		sim.enemy_hp_mult = pow(float(DataDB.balance().get("endless_hp_growth", 1.0)), run.endless_round)
 	sim.restore_structures(run.structures)
 	# Hero keeps its level across the journey.
 	while sim.hero.level < run.hero_level:
@@ -28,6 +35,8 @@ static func waves_for(run: RunState, node: Dictionary) -> Array:
 	var mods := run.mods()
 	# Maps with a longer road give towers more time, so they bring bigger waves.
 	var extra := float(DataDB.map(run.map_id).get("wave_budget_bonus", 0.0))
+	# Endless rounds ramp faster than the journey so the siege eventually wins.
+	extra += float(DataDB.balance().get("endless_ramp", 0.0)) * run.endless_round
 	var out := []
 	for i in n:
 		out.append(WaveDirector.build_wave(node.type, int(node.layer), i, n, rng, mods, run.harder_next + extra))
@@ -52,6 +61,14 @@ static func finish_combat(run: RunState, sim: BattleSim, node: Dictionary, waves
 	run.stats.kills += int(sim.stats.kills)
 	run.stats.gold_earned += int(sim.stats.gold_earned)
 	run.stats.time += sim.time
+	if run.endless_round > 0:
+		# The journey is already won: endless ends on defeat, keeping the victory.
+		if sim.defeated:
+			run.finished = true
+		else:
+			run.endless_round += 1
+			run.current_node = "E%d" % run.endless_round
+		return
 	if sim.defeated:
 		run.finished = true
 		run.victory = false
@@ -66,6 +83,23 @@ static func finish_combat(run: RunState, sim: BattleSim, node: Dictionary, waves
 			run.stats.boss += 1
 			run.finished = true
 			run.victory = true
+
+
+## After the boss: keep the same defences and fight ever deeper rounds until the core
+## falls. Starts with a partial repair.
+static func start_endless(run: RunState) -> void:
+	run.finished = false
+	run.endless_round = 1
+	run.current_node = "E1"
+	run.core_hp = minf(run.core_max(), run.core_hp + run.core_max() * float(DataDB.balance().get("endless_heal_pct", 0.3)))
+	run.history.append({"t": "endless_start", "core": int(round(run.core_hp))})
+
+
+## Encounter for the current endless round: an elite every 3rd round, a boss every 5th.
+static func endless_node(run: RunState) -> Dictionary:
+	var r := run.endless_round
+	var type := "boss" if r % 5 == 0 else ("elite" if r % 3 == 0 else "combat")
+	return {"id": "E%d" % r, "type": type, "layer": run.depth(), "index": 0, "links": [], "endless": true}
 
 
 static func enter(run: RunState, node_id: String) -> Dictionary:

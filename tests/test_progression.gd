@@ -331,3 +331,41 @@ func test_mage_bolts_can_ignite() -> void:
 			break
 	check(burned, "fire bolts ignite sometimes")
 	check(sim.stats.damage.has("hero"), "hero damage recorded")
+
+
+func test_endless_siege_after_victory() -> void:
+	var run := RunState.create(31, "ranger", [], ["banner", "tar"])
+	run.victory = true
+	run.finished = true
+	run.gold = 2500  # stands in for the defences built during the journey
+	run.core_hp = 40.0
+	RunFlow.start_endless(run)
+	check(not run.finished and run.endless_round == 1, "endless starts")
+	check(run.core_hp > 40.0, "partial repair")
+	check_eq(run.depth(), int(DataDB.journey().layers), "rounds go deeper than the journey")
+	check_eq(RunFlow.endless_node(run).type, "combat", "first round is a normal battle")
+	run.endless_round = 3
+	check_eq(RunFlow.endless_node(run).type, "elite", "every 3rd round is elite")
+	run.endless_round = 5
+	check_eq(RunFlow.endless_node(run).type, "boss", "every 5th round is a boss")
+	run.endless_round = 1
+	var pilot := Autopilot.new(31)
+	var guard := 0
+	while not run.finished and guard < 2:
+		guard += 1
+		var node := RunFlow.endless_node(run)
+		Autopilot.play_combat(run, node, pilot)
+		var picks := RunFlow.reward_choices(run, node)
+		if not run.finished and not picks.is_empty():
+			RunFlow.record_reward(run, picks, picks[0])
+	if not run.finished:
+		# Strip the defences: the next round must break the core.
+		run.core_hp = 1.0
+		run.structures = []
+		run.gold = 0
+		Autopilot.play_combat(run, RunFlow.endless_node(run), Autopilot.new(1))
+	check(run.finished and run.victory, "endless ends on defeat but keeps the victory (round %d)" % run.endless_round)
+	check(run.endless_cleared() >= 1, "survived at least one round")
+	var copy := RunState.from_dict(JSON.parse_string(JSON.stringify(run.to_dict())))
+	check_eq(copy.endless_round, run.endless_round, "endless round saved")
+	check(Achievements.met({"type": "endless", "min": 1}, run, {}), "endless achievement rule")

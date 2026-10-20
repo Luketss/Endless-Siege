@@ -8,5 +8,7 @@
 	"frostbitten":    { "name_key": "ACH_FROSTBITTEN",    "rule": { "type": "victory", "map": "frost" } },
 	"synergist":      { "name_key": "ACH_SYNERGIST",      "rule": { "type": "synergies", "min": 3 } },
 	"legend":         { "name_key": "ACH_LEGEND",         "rule": { "type": "rarity", "rarity": "legendary" } },
+	"endless_5":      { "name_key": "ACH_ENDLESS_5",      "rule": { "type": "endless", "min": 5 } },
+	"endless_15":     { "name_key": "ACH_ENDLESS_15",     "rule": { "type": "endless", "min": 15 } },
 	"slayer":         { "name_key": "ACH_SLAYER",         "rule": { "type": "stat_total", "stat": "kills", "min": 2000 } }
 }

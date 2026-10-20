@@ -97,6 +97,9 @@ func _show_journey() -> void:
 	rig.overview_center = Vector3(0, 0, 0)
 	rig.set_captured(false)
 	Music.set_intensity(0.0)
+	if run.endless_round > 0:
+		_show_endless_round()
+		return
 	var jp := JourneyPanel.new()
 	jp.setup(run)
 	jp.node_chosen.connect(_enter_node)
@@ -238,7 +241,10 @@ func _process(delta: float) -> void:
 	_update_tutorial(delta)
 	hero.attack_blocked = build.is_building()
 	build.update(not _paused and phase != "done")
-	hud.refresh(sim, {"title": "%s · %s" % [Texts.node_name(node.get("type", "combat")), tr(map.name_key)],
+	var title := Texts.node_name(node.get("type", "combat"))
+	if node.get("endless", false):
+		title = "%s · %s" % [tr("ENDLESS_ROUND") % run.endless_round, title]
+	hud.refresh(sim, {"title": "%s · %s" % [title, tr(map.name_key)],
 		"wave": wave_index, "waves": waves.size(), "phase": phase, "speed": SPEEDS[speed_index],
 		"captured": rig.is_captured()}, build)
 	var intensity := 0.15
@@ -332,8 +338,13 @@ func _encounter_won() -> void:
 	build.cancel()
 	if run.finished:
 		Sfx.play("victory")
-		get_tree().create_timer(2.0).timeout.connect(_finish_run)
+		if run.victory and run.endless_round == 0:
+			get_tree().create_timer(2.0).timeout.connect(_offer_endless)
+		else:
+			get_tree().create_timer(2.0).timeout.connect(_finish_run)
 		return
+	if node.get("endless", false):
+		hud.toast(tr("ENDLESS_SURVIVED") % run.endless_cleared(), UITheme.GOLD)
 	var choices := RunFlow.reward_choices(run, node)
 	get_tree().create_timer(1.2).timeout.connect(func():
 		hud.visible = false
@@ -341,6 +352,33 @@ func _encounter_won() -> void:
 			_after_reward()
 		else:
 			_show_reward(choices, tr("REWARD_TITLE_ELITE") if node.type == "elite" else tr("REWARD_TITLE")))
+
+
+## After the boss: finish the journey, or keep the same defences for the endless siege.
+func _offer_endless() -> void:
+	hud.visible = false
+	rig.set_captured(false)
+	var key := "%s|%s" % [run.hero_id, run.map_id]
+	var best := int(Profile.data.get("endless_best", {}).get(key, 0))
+	_set_overlay(Panels.dialog(tr("ENDLESS_TITLE"), tr("ENDLESS_TEXT") % [int(float(DataDB.balance().endless_heal_pct) * 100), best], [
+		{"text": tr("ENDLESS_GO"), "callback": func():
+			RunFlow.start_endless(run)
+			Sfx.play("wave_start")
+			var choices := RunFlow.reward_choices(run, node)
+			_show_reward(choices, tr("REWARD_TITLE"))},
+		{"text": tr("ENDLESS_FINISH"), "callback": _finish_run},
+	]))
+
+
+func _show_endless_round() -> void:
+	_set_overlay(Panels.dialog(tr("ENDLESS_ROUND") % run.endless_round, tr("ENDLESS_ROUND_TEXT") % Texts.node_name(RunFlow.endless_node(run).type), [
+		{"text": tr("ENDLESS_START"), "callback": func():
+			node = RunFlow.endless_node(run)
+			_start_encounter()},
+		{"text": tr("PAUSE_MENU_SAVE"), "callback": func():
+			Profile.save_run(run)
+			get_tree().change_scene_to_file("res://scenes/main_menu.tscn")},
+	]))
 
 
 func _encounter_lost() -> void:
@@ -387,7 +425,7 @@ func _pause_menu() -> Control:
 		{"text": tr("PAUSE_ABANDON"), "callback": func():
 			_paused = false
 			run.finished = true
-			run.victory = false
+			run.victory = run.endless_round > 0  # leaving the endless siege keeps the win
 			_finish_run()},
 		{"text": tr("PAUSE_MENU_SAVE"), "callback": func():
 			# Saving mid-battle restores the run at the start of this encounter.
