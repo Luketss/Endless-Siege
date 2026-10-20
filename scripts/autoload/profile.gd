@@ -124,7 +124,12 @@ func finish_run(run: RunState) -> int:
 	var st: Dictionary = data.stats
 	if run.victory:
 		st.victories = int(st.victories) + 1
-	st.best_layer = maxi(int(st.best_layer), run.depth())
+	st.best_layer = maxi(int(st.best_layer), mini(run.depth(), int(DataDB.journey().layers) - 1))
+	if run.endless_round > 0:
+		var best: Dictionary = data.get("endless_best", {})
+		var key := "%s|%s" % [run.hero_id, run.map_id]
+		best[key] = maxi(int(best.get(key, 0)), run.endless_cleared())
+		data.endless_best = best
 	st.kills = int(st.kills) + int(run.stats.kills)
 	st.waves = int(st.waves) + int(run.stats.waves)
 	if Settings.get_value("run_log"):

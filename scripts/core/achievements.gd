@@ -35,6 +35,8 @@ static func met(rule: Dictionary, run: RunState, stats: Dictionary) -> bool:
 			return run.mods().active_synergies.size() >= int(rule.min)
 		"rarity":
 			return run.upgrades.any(func(u): return DataDB.upgrade(u).rarity == rule.rarity)
+		"endless":
+			return run.endless_cleared() >= int(rule.min)
 		"stat_total":
 			return int(stats.get(rule.stat, 0)) >= int(rule.min)
 	return false

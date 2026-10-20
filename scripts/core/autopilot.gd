@@ -114,3 +114,15 @@ static func play_journey(seed_value: int, unlocks: Array = [], modifiers: Array 
 				if not ups.is_empty():
 					RunFlow.record_reward(run, ups, ups[0], "event_reward")
 	return run
+
+
+## Continues a won journey into the endless siege until the core falls (or `max_rounds`).
+static func play_endless(run: RunState, seed_value: int, max_rounds: int = 40) -> void:
+	var pilot := Autopilot.new(seed_value + 7)
+	RunFlow.start_endless(run)
+	while not run.finished and run.endless_round <= max_rounds:
+		var node := RunFlow.endless_node(run)
+		play_combat(run, node, pilot)
+		var picks := RunFlow.reward_choices(run, node)
+		if not run.finished and not picks.is_empty():
+			RunFlow.record_reward(run, picks, picks[pilot.rng.randi() % picks.size()])
