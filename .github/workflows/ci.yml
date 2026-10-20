@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.3 and export templates
+        run: |
+          curl -sSL -o godot.zip https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q godot.zip && mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          curl -sSL -o tpl.tpz https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          unzip -q -j tpl.tpz 'templates/linux_*.x86_64' 'templates/windows_*x86_64*' 'templates/version.txt' -d ~/.local/share/godot/export_templates/4.3.stable
+          rm tpl.tpz godot.zip
+      - name: Translation keys
+        run: python3 tools/check_translations.py
+      - name: Tests
+        run: GODOT=godot tools/run_tests.sh
+      - name: Export Windows and Linux
+        run: GODOT=godot tools/export_all.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: endless-siege-builds
+          path: build/

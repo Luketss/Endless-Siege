@@ -111,7 +111,7 @@ static func _ground(root: Node3D, map: MapDef) -> void:
 	rng.seed = 5
 	for i in 18:
 		var p := Vector2(rng.randf_range(map.bounds.position.x, map.bounds.end.x), rng.randf_range(map.bounds.position.y, map.bounds.position.y + 26))
-		Art.part(root, Art.cyl(1.0, 1.0, 0.02, 12), Art.mat(Art.PALETTE.corruption.darkened(0.2)), Vector3(p.x, 0.012, p.y),
+		Art.part(root, Art.cyl(1.0, 1.0, 0.02, 12), Art.mat(Art.PALETTE.corruption.lerp(Art.PALETTE.grass, 0.45).darkened(0.15)), Vector3(p.x, 0.012, p.y),
 			Vector3.ZERO, Vector3(rng.randf_range(1.5, 4.0), 1, rng.randf_range(1.5, 4.0)), false)
 
 

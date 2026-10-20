@@ -79,11 +79,10 @@ func _run() -> void:
 	g._start_wave()
 	sim.start_wave(w)
 	# Let the battle develop with the camera behind the hero, looking down the road.
-	var hero_spot := sim.map.path.sample(72.0) + Vector2(4.5, 3.0)
-	g.hero.global_position = Vector3(hero_spot.x, 0.2, hero_spot.y)
-	g.rig.yaw = deg_to_rad(150.0)
-	g.rig.pitch = -0.38
-	g.rig.distance = 9.5
+	g.hero.global_position = Vector3(-7.0, 0.2, -12.5)
+	g.rig.yaw = deg_to_rad(-30.0)
+	g.rig.pitch = -0.42
+	g.rig.distance = 10.0
 	for i in 260:
 		await process_frame
 		if i % 12 == 0 and sim.hero.alive:
@@ -94,7 +93,7 @@ func _run() -> void:
 			if target != Vector3.ZERO:
 				sim.hero_attack(sim.hero.pos + Vector3(0, 1.4, 0), target - sim.hero.pos)
 		if i == 150:
-			var tgt := sim.map.path.sample(45.0)
+			var tgt := sim.map.path.sample(18.0)
 			sim.hero_rain(Vector3(tgt.x, 0, tgt.y))
 	g.view.show_all_ranges = false
 	await _shot("03_battle")

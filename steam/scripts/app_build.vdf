@@ -1,0 +1,12 @@
+"AppBuild"
+{
+	"AppID" "0000000"             // TODO: your Steam App ID (Steamworks > App Admin)
+	"Desc" "Endless Siege build"  // shown in the Steamworks build list
+	"ContentRoot" "../../build/"  // relative to this file
+	"BuildOutput" "../output/"
+	"Depots"
+	{
+		"0000001" "depot_windows.vdf"   // TODO: Windows depot ID
+		"0000002" "depot_linux.vdf"     // TODO: Linux depot ID
+	}
+}

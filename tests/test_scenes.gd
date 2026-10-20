@@ -84,6 +84,52 @@ func test_game_journey_and_battle() -> void:
 	await _frames(2)
 
 
+func test_hero_and_build_input() -> void:
+	var profile: Node = get_tree().root.get_node("Profile")
+	profile.active_run = RunState.create(99, "ranger", [], [])
+	var g := await _open("res://scenes/game.tscn")
+	g._enter_node("0-0")
+	await _frames(10)
+	var start: Vector3 = g.hero.global_position
+	Input.action_press("move_forward")
+	await _physics(30)
+	Input.action_release("move_forward")
+	check(g.hero.global_position.distance_to(start) > 1.0, "WASD moves the hero (%.2f m)" % g.hero.global_position.distance_to(start))
+	var shots: int = 0
+	Input.action_press("attack")
+	await _physics(5)
+	Input.action_release("attack")
+	for p in g.sim.projectiles:
+		if p.source == BattleSim.HERO:
+			shots += 1
+	check(shots >= 1, "attack fires arrows")
+	Input.action_press("dodge")
+	await _physics(2)
+	Input.action_release("dodge")
+	check(g.sim.hero.dodge_cd > 0.0, "dodge used")
+	# Select slot 1 (arrow tower): the ghost appears under the crosshair.
+	Input.action_press("slot_1")
+	await _frames(2)
+	Input.action_release("slot_1")
+	check(g.build.selected == "arrow", "slot key selects a structure")
+	check(g.hero.attack_blocked, "attack placement instead of shooting while building")
+	Input.action_press("cancel")
+	await _frames(2)
+	Input.action_release("cancel")
+	check(g.build.selected == "", "right click cancels")
+	Input.action_press("start_wave")
+	await _frames(2)
+	Input.action_release("start_wave")
+	check(g.phase == "wave", "start wave key")
+	g.queue_free()
+	await _frames(2)
+
+
+func _physics(n: int) -> void:
+	for i in n:
+		await get_tree().physics_frame
+
+
 func test_result_screen_loads() -> void:
 	var profile: Node = get_tree().root.get_node("Profile")
 	var run := RunState.create(1, "ranger", [], [])

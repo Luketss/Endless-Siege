@@ -1,0 +1,60 @@
+# Fases de desenvolvimento
+
+Cada fase indica o critério de conclusão, como reproduzir e o estado atual. "✅" significa implementado e coberto por teste automatizado ou verificado em execução.
+
+## Fase 1: Protótipo de combate ✅
+
+- **Critério:** movimentação, câmera, inimigos seguindo o caminho, ataques e vida da base.
+- **Entregue:** herói (WASD, câmera no ombro, tiro), inimigos pela estrada, núcleo com vida, derrota.
+- **Testes:** `test_enemy_walks_the_road_and_leaks`, `test_defeat_when_core_destroyed`, `test_hero_and_build_input`.
+- **Reproduzir:** F5 → Nova jornada → Batalha → `G`.
+
+## Fase 2: Tower Defense ✅
+
+- **Critério:** construção, posicionamento, economia, torres e armadilhas.
+- **Entregue:** posicionamento livre validado (estrada, colisão, terreno, linha de visão), 4 torres e 3 armadilhas, melhorar, vender, modos de alvo, ouro por abate, por onda e por suprimentos.
+- **Testes:** `test_build.gd` (15 testes: posicionamento, platôs, custo, venda, linha de visão, cada torre e armadilha).
+
+## Fase 3: Combate e IA ✅
+
+- **Critério:** herói com habilidades, inimigos especializados e chefe.
+- **Entregue:** Chuva de Flechas, Rajada, esquiva, níveis; voador, blindado, divisor, feiticeiro (desativa torres), guardião (aura), elites; Golem com 3 fases.
+- **Testes:** `test_hero_*`, `test_warden_*`, `test_hexer_*`, `test_splitter_*`, `test_boss_phases`.
+
+## Fase 4: Roguelike ✅
+
+- **Critério:** melhorias aleatórias, raridades, sinergias e eventos.
+- **Entregue:** 28 melhorias, 4 raridades, 8 sinergias por marcadores mais interações, 5 eventos, loja e acampamento.
+- **Testes:** `test_roguelike.gd` (raridade, exclusões, sinergias, perfurar, estilhaçar, empalar, cadeia, chão em chamas, sobrecarga, determinismo da jornada).
+
+## Fase 5: Progressão ✅ (básica)
+
+- **Critério:** desbloqueios, jornadas, recompensas e salvamento.
+- **Entregue:** essência, Santuário (4 desbloqueios), desafios, jornada salva entre encontros, saves com checksum e backup.
+- **Testes:** `test_progression.gd` (corrupção de save, serialização, essência, jornadas completas).
+
+## Fase 6: Polimento ⏳ (parcial)
+
+| Feito | Pendente |
+|---|---|
+| Interface completa (HUD, jornada, cartas, configurações, remapeamento, PT/EN) | **Arte final**: modelos, animações esqueléticas e texturas (hoje são primitivas estilizadas) |
+| Efeitos visuais (explosões, faíscas, números, raios, anéis) e feedback de sinergias | **Áudio gravado** e música composta (hoje sintetizados; a API de música dinâmica já existe) |
+| Música dinâmica em duas camadas | Medição de desempenho em hardware real e perfis gráficos |
+| Opções de qualidade (sombras, efeitos, FPS) | **Balanceamento com jogadores reais** |
+| Balanceamento inicial por simulação | Tutorial interativo (hoje são dicas na primeira batalha) |
+
+## Fase 7: Distribuição ⏳ (preparada)
+
+| Feito | Pendente |
+|---|---|
+| Builds de Windows e Linux pela CLI e pela CI | Executar e testar o build de Windows em máquina Windows |
+| Modelos de upload SteamPipe | IDs de app/depot, integração GodotSteam, conquistas, Steam Cloud |
+| Checklist da loja | Página da loja, trailer, cápsulas, requisitos mínimos medidos |
+| | Suporte a controle (necessário para o Steam Deck "Verificado") |
+
+## Próximo conteúdo (depois de validar o núcleo)
+
+1. Guerreiro e Mago (os dados de herói já suportam vários heróis; faltam modelo e habilidades em `HeroController`).
+2. Novos biomas e mapas (ruínas, fortalezas, cavernas) com desafios ambientais.
+3. Estruturas de atração ou agrupamento (iscas) e armadilhas elementais adicionais.
+4. Mais eventos, relíquias e chefes.
