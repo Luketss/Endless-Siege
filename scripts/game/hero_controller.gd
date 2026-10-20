@@ -44,7 +44,11 @@ func _physics_process(delta: float) -> void:
 	_time += delta
 	var h := sim.hero
 	if not h.alive:
-		model.visible = false
+		if model.has_meta("anim"):
+			if _was_alive:
+				Assets.play(model, "death", 1.0, 0.05)
+		else:
+			model.visible = false
 		_was_alive = false
 		return
 	if not _was_alive:
@@ -114,12 +118,24 @@ func _animate(delta: float, move: Vector3) -> void:
 		var yaw := atan2(-face.x, -face.z)
 		model.rotation.y = lerp_angle(model.rotation.y, yaw, minf(1.0, delta * 14.0))
 	var speed := Vector2(velocity.x, velocity.z).length()
-	parts.body.position.y = 0.75 + absf(sin(_time * 10.0)) * 0.06 * minf(1.0, speed / 6.0)
 	_recoil = maxf(0.0, _recoil - delta * 6.0)
-	parts.bow.position.z = -0.25 + _recoil * 0.12
-	if _dodge_t > 0.0:
-		model.rotation.x = -TAU * (1.0 - _dodge_t / 0.32)
+	if model.has_meta("anim"):
+		_animate_imported(speed)
 	else:
-		model.rotation.x = 0.0
+		parts.body.position.y = 0.75 + absf(sin(_time * 10.0)) * 0.06 * minf(1.0, speed / 6.0)
+		parts.bow.position.z = -0.25 + _recoil * 0.12
+		model.rotation.x = -TAU * (1.0 - _dodge_t / 0.32) if _dodge_t > 0.0 else 0.0
 	# Flicker while invulnerable after respawn.
 	model.visible = sim.hero.invuln_t <= 0.0 or _dodge_t > 0.0 or int(_time * 12.0) % 2 == 0
+
+
+## Skeletal animation for the imported hero model.
+func _animate_imported(speed: float) -> void:
+	if _dodge_t > 0.0:
+		Assets.play(model, "roll", 1.6, 0.05)
+	elif _recoil > 0.0 or (input_enabled and Input.is_action_pressed("attack") and not attack_blocked):
+		Assets.play(model, "shoot", 2.0, 0.08)
+	elif speed > 0.5:
+		Assets.play(model, "run", clampf(speed / 6.0, 0.6, 1.4))
+	else:
+		Assets.play(model, "idle")

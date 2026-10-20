@@ -18,7 +18,7 @@ Cada fase indica o critério de conclusão, como reproduzir e o estado atual. "�
 ## Fase 3: Combate e IA ✅
 
 - **Critério:** herói com habilidades, inimigos especializados e chefe.
-- **Entregue:** Chuva de Flechas, Rajada, esquiva, níveis; voador, blindado, divisor, feiticeiro (desativa torres), guardião (aura), elites; Golem com 3 fases.
+- **Entregue:** Chuva de Flechas, Rajada, esquiva, níveis; voador, blindado, divisor, feiticeiro (desativa torres), guardião (aura), elites; Dragão Ancestral com 3 fases.
 - **Testes:** `test_hero_*`, `test_warden_*`, `test_hexer_*`, `test_splitter_*`, `test_boss_phases`.
 
 ## Fase 4: Roguelike ✅
@@ -37,7 +37,8 @@ Cada fase indica o critério de conclusão, como reproduzir e o estado atual. "�
 
 | Feito | Pendente |
 |---|---|
-| Interface completa (HUD, jornada, cartas, configurações, remapeamento, PT/EN) | **Arte final**: modelos, animações esqueléticas e texturas (hoje são primitivas estilizadas) |
+| Interface completa (HUD, jornada, cartas, configurações, remapeamento, PT/EN) | **Identidade visual própria**: hoje usamos packs CC0 de Kenney/Quaternius (bons para protótipo e teste, mas genéricos) |
+| Modelos 3D animados CC0 para heroína, inimigos, chefe, torres e cenário (`data/visuals.json`, com fallback procedural) | Modelos para armadilhas, núcleo e portal; animação de ataque dos inimigos contra a heroína |
 | Efeitos visuais (explosões, faíscas, números, raios, anéis) e feedback de sinergias | **Áudio gravado** e música composta (hoje sintetizados; a API de música dinâmica já existe) |
 | Música dinâmica em duas camadas | Medição de desempenho em hardware real e perfis gráficos |
 | Opções de qualidade (sombras, efeitos, FPS) | **Balanceamento com jogadores reais** |

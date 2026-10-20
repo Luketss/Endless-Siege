@@ -64,7 +64,9 @@ static func _environment(root: Node3D, shadows: bool) -> void:
 	sun.light_color = Color("ffe2c2")
 	sun.light_energy = 1.25
 	sun.shadow_enabled = shadows
-	sun.directional_shadow_max_distance = 90.0
+	sun.shadow_bias = 0.3
+	sun.shadow_normal_bias = 3.0
+	sun.directional_shadow_max_distance = 60.0
 	root.add_child(sun)
 
 
@@ -181,6 +183,21 @@ static func _plateau(root: Node3D, pl: Dictionary) -> void:
 static func _obstacle(root: Node3D, map: MapDef, o: Dictionary) -> void:
 	var p: Vector2 = o.pos
 	var r := float(o.radius)
+	var env: Dictionary = DataDB.visuals().get("environment", {})
+	var pick: Array = env.get("tall_obstacle" if o.tall else "short_obstacle", [])
+	if not pick.is_empty():
+		# Imported rocks, sized to the gameplay radius (tall ones block line of sight).
+		var rock := Assets.prop(pick[int(abs(p.x * 7.0 + p.y * 3.0)) % pick.size()], 1.0, p.x * 37.0)
+		if rock:
+			rock.scale = Vector3(r * 2.2, r * (2.8 if o.tall else 1.6), r * 2.2)
+			Assets.tint(rock, Color("8f8a84"), false)
+			rock.position = Vector3(p.x, 0, p.y)
+			root.add_child(rock)
+			if o.tall:
+				_static_cylinder(root, Vector3(p.x, 2.5, p.y), r, 5.0)
+			else:
+				_static_cylinder(root, Vector3(p.x, 0.6, p.y), r * 0.9, 1.2)
+			return
 	if o.tall:
 		# Ruined pillar / corrupted crystal spire: blocks line of sight.
 		Art.part(root, Art.cyl(r * 0.75, r, 4.5, 6), Art.mat(Art.PALETTE.stone), Vector3(p.x, 2.25, p.y))
@@ -195,6 +212,10 @@ static func _wall(root: Node3D, w: Dictionary) -> void:
 	var r: Rect2 = w.rect
 	var c := r.get_center()
 	var h := 3.2
+	var env: Dictionary = DataDB.visuals().get("environment", {})
+	if env.has("wall") and _imported_wall(root, r, env):
+		_static_box(root, Vector3(c.x, h * 0.5, c.y), Vector3(r.size.x, h, r.size.y))
+		return
 	Art.part(root, Art.box(Vector3(r.size.x, h, r.size.y)), Art.mat(Color("6c665f")), Vector3(c.x, h * 0.5, c.y))
 	# Broken crenellations.
 	var n := int(maxf(r.size.x, r.size.y) / 1.4)
@@ -205,6 +226,35 @@ static func _wall(root: Node3D, w: Dictionary) -> void:
 		var q := Vector2(lerpf(r.position.x, r.end.x, t), c.y) if r.size.x > r.size.y else Vector2(c.x, lerpf(r.position.y, r.end.y, t))
 		Art.part(root, Art.box(Vector3(0.7, 0.6, 0.7)), Art.mat(Color("6c665f")), Vector3(q.x, h + 0.3, q.y))
 	_static_box(root, Vector3(c.x, h * 0.5, c.y), Vector3(r.size.x, h, r.size.y))
+
+
+## Tiles castle wall segments along the long side of the rectangle.
+static func _imported_wall(root: Node3D, r: Rect2, env: Dictionary) -> bool:
+	var sc := float(env.get("wall_scale", 2.4))
+	var horizontal := r.size.x >= r.size.y
+	var length := r.size.x if horizontal else r.size.y
+	var n := maxi(1, int(round(length / sc)))
+	var step := length / n
+	for i in n:
+		var piece := Assets.prop(env.wall, 1.0, 0.0 if horizontal else 90.0)
+		if piece == null:
+			return false
+		piece.scale = Vector3(step, sc, sc * 0.6)
+		Assets.tint(piece, Color("9a9fa8"), false)
+		Assets.no_self_shadow(piece)
+		var t := (i + 0.5) * step
+		piece.position = Vector3(r.position.x + t, 0, r.get_center().y) if horizontal else Vector3(r.get_center().x, 0, r.position.y + t)
+		root.add_child(piece)
+	Assets.shadow_proxy_box(root, Vector3(r.size.x, sc * 1.25, r.size.y), Vector3(r.get_center().x, sc * 0.62, r.get_center().y))
+	for end in [0.0, length]:
+		var pillar := Assets.prop(env.get("wall_pillar", ""), sc * 0.7)
+		if pillar:
+			pillar.position = Vector3(r.position.x + end, 0, r.get_center().y) if horizontal else Vector3(r.get_center().x, 0, r.position.y + end)
+			pillar.scale.y = sc * 1.1
+			Assets.tint(pillar, Color("9a9fa8"), false)
+			Assets.no_self_shadow(pillar)
+			root.add_child(pillar)
+	return true
 
 
 static func _borders(root: Node3D, map: MapDef) -> void:
@@ -232,6 +282,16 @@ static func _decor(root: Node3D, map: MapDef) -> void:
 		var p := Vector2(rng.randf_range(b.position.x + 1, b.end.x - 1), rng.randf_range(b.position.y + 1, b.end.y - 1))
 		if map.path.distance_to(p) < map.path_width * 0.5 + 0.5 or not map.plateau_at(p).is_empty():
 			continue
+		var env: Dictionary = DataDB.visuals().get("environment", {})
+		var decor: Array = env.get("decor", [])
+		if not decor.is_empty():
+			var d := Assets.prop(decor[rng.randi() % decor.size()], float(env.get("decor_scale", 2.5)) * rng.randf_range(0.8, 1.2), rng.randf() * 360.0)
+			if d:
+				d.position = Vector3(p.x, 0, p.y)
+				for mi in Assets._meshes(d):
+					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				root.add_child(d)
+				continue
 		if rng.randf() < 0.6:
 			Art.part(root, Art.cone(0.18, 0.5, 5), Art.mat(Color("5d7a4a")), Vector3(p.x, 0.25, p.y), Vector3.ZERO, Vector3.ONE, false)
 		else:
@@ -240,6 +300,14 @@ static func _decor(root: Node3D, map: MapDef) -> void:
 
 
 static func _tree(root: Node3D, p: Vector2, rng: RandomNumberGenerator) -> void:
+	var env: Dictionary = DataDB.visuals().get("environment", {})
+	var trees: Array = env.get("trees", [])
+	if not trees.is_empty():
+		var t := Assets.prop(trees[rng.randi() % trees.size()], float(env.get("tree_scale", 3.5)) * rng.randf_range(0.8, 1.5), rng.randf() * 360.0)
+		if t:
+			t.position = Vector3(p.x, 0, p.y)
+			root.add_child(t)
+			return
 	var s := rng.randf_range(0.8, 1.6)
 	var corrupt := rng.randf() < 0.35
 	Art.part(root, Art.cyl(0.25 * s, 0.35 * s, 2.0 * s, 6), Art.mat(Art.PALETTE.wood_dark), Vector3(p.x, 1.0 * s, p.y))

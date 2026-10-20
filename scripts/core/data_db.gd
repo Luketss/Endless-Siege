@@ -76,6 +76,10 @@ static func heroes() -> Dictionary:
 	return _load("res://data/heroes.json")
 
 
+static func visuals() -> Dictionary:
+	return _load("res://data/visuals.json")
+
+
 static func hero(id: String) -> Dictionary:
 	return heroes().get(id, {})
 

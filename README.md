@@ -2,7 +2,7 @@
 
 Tower defense roguelike em **3D, terceira pessoa**, para PC (Windows primeiro, Linux também; Steam Deck via Linux). Você controla uma heroína que luta ao lado das suas torres e armadilhas, avança por uma jornada ramificada de encontros e monta uma build diferente a cada tentativa, escolhendo uma de três melhorias aleatórias após cada batalha.
 
-Feito em **Godot 4.3** (GDScript). A arte, os sons e a música são placeholders gerados por código (primitivas 3D estilizadas e áudio sintetizado), para validar a diversão do núcleo antes de investir em assets.
+Feito em **Godot 4.3** (GDScript). Personagens, inimigos, torres e cenário usam modelos 3D **CC0** de Kenney e Quaternius, com animações esqueléticas (ver [assets/CREDITS.md](assets/CREDITS.md)). Armadilhas, núcleo, portal, efeitos, sons e música ainda são gerados por código. Se algum arquivo de arte faltar, o jogo volta automaticamente aos modelos procedurais.
 
 | Jornada | Batalha | Construção |
 |---|---|---|
@@ -19,7 +19,7 @@ Feito em **Godot 4.3** (GDScript). A arte, os sons e a música são placeholders
 | 3 | Três torres | ✅ Flechas, Canhão, Pináculo Gélido, mais o Estandarte de Guerra (suporte, desbloqueável) |
 | 4 | Duas armadilhas | ✅ Espinhos, Placa de Mola (empurrão), mais o Poço de Piche (óleo/lentidão, desbloqueável) |
 | 5 | Cinco tipos de inimigos | ✅ 7 tipos + fragmento: básico, rápido, blindado, voador, divisor, feiticeiro (desativa torres), guardião (protege aliados) |
-| 6 | Um chefe | ✅ Golem Ancestral: 3 fases com pisão que desativa estruturas, invocações, armadura e fúria |
+| 6 | Um chefe | ✅ Dragão Ancestral: 3 fases com pisão que desativa estruturas, invocações, armadura e fúria |
 | 7 | ≥ 20 melhorias | ✅ 28 melhorias (comum, rara, épica, lendária) |
 | 8 | Escolha entre três | ✅ Cartas com raridade, marcadores e aviso da sinergia que será ativada |
 | 9 | Sinergias | ✅ 8 sinergias por marcadores + interações entre cartas (gelo+raio, óleo+fogo, mola+espinhos, crítico+ricochete, suporte+torres…) |
@@ -30,7 +30,7 @@ Feito em **Godot 4.3** (GDScript). A arte, os sons e a música são placeholders
 | 14 | Save e progressão permanente | ✅ Essência e desbloqueios no Santuário, desafios opcionais, jornada salva entre encontros, saves com checksum e backup |
 | 15 | Partida completa do início ao fim | ✅ Coberta por testes automatizados (jornadas inteiras simuladas) e testes de cena |
 
-O que ainda falta (arte final, áudio gravado, integração com o Steamworks, testes com jogadores, outros heróis) está em [docs/FASES.md](docs/FASES.md).
+O que ainda falta (identidade visual própria, áudio gravado, integração com o Steamworks, testes com jogadores, outros heróis) está em [docs/FASES.md](docs/FASES.md).
 
 ## Como jogar (desenvolvimento)
 
@@ -52,7 +52,7 @@ O que ainda falta (arte final, áudio gravado, integração com o Steamworks, te
 ## Testes e ferramentas
 
 ```bash
-GODOT=/caminho/godot tools/run_tests.sh             # 59 testes headless (regras, IA, cenas, input)
+GODOT=/caminho/godot tools/run_tests.sh             # 64 testes headless (regras, IA, cenas, input, assets)
 python3 tools/check_translations.py                 # todas as chaves de texto existem em PT/EN
 godot --headless --path . --script res://tools/balance_sim.gd   # jornadas simuladas (balanceamento)
 GODOT=/caminho/godot tools/export_all.sh            # builds de Windows e Linux em build/

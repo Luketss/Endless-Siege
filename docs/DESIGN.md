@@ -43,7 +43,7 @@ Todos os números vêm de `data/*.json`; esta página resume os valores atuais.
 
 A vida cresce 60% por camada e o orçamento das ondas 70% por camada e 40% por onda. Feiticeiros e guardiões chegam com escolta, formando combinações em vez de apenas números maiores.
 
-**Golem Ancestral (chefe):** 2600 de vida base, armadura 4.
+**Dragão Ancestral (chefe):** 2600 de vida base, armadura 4.
 - Fase 1: pisão a cada 8 s (desativa estruturas num raio de 7 m e fere o herói).
 - Fase 2, a 66%: +4 de armadura, invoca 6 brutamontes a cada 9 s.
 - Fase 3, a 33%: fúria (+60% de velocidade), pisão a cada 4 s, invoca corredores.

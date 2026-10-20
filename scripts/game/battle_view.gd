@@ -17,6 +17,7 @@ var _proj_pool := {}
 var _zone_nodes := {}
 var _cache_node: Node3D
 var _time := 0.0
+var _dying: Array[Dictionary] = []
 var _hp_bar_mesh := QuadMesh.new()
 
 
@@ -48,6 +49,7 @@ func apply_settings() -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	_update_dying(delta)
 	if sim == null:
 		return
 	_sync_enemies(delta)
@@ -78,6 +80,8 @@ func _sync_enemies(delta: float) -> void:
 		if vel.length() > 0.001:
 			var yaw := atan2(-vel.x, -vel.z)
 			node.rotation.y = lerp_angle(node.rotation.y, yaw, minf(1.0, delta * 12.0))
+		if node.has_meta("anim"):
+			_animate_enemy(node, e)
 		var parts: Dictionary = node.get_meta("parts")
 		var body: Node3D = parts.get("body")
 		if body and not e.flying and e.frozen_t <= 0.0:
@@ -108,8 +112,46 @@ func _acquire_enemy(e: Units.Enemy) -> Node3D:
 func _release_enemy(id: int) -> void:
 	var node: Node3D = _enemy_nodes[id]
 	_enemy_nodes.erase(id)
+	# Animated models play their death clip before going back to the pool.
+	var t := minf(1.1, Assets.clip_length(node, "death"))
+	if t > 0.0 and node.visible and not fx.low_quality and Assets.play(node, "death", 1.0, 0.05):
+		var bar: Node3D = node.get_meta("hp_bar") if node.has_meta("hp_bar") else null
+		if bar:
+			bar.visible = false
+		_dying.append({"node": node, "t": t})
+		return
+	_to_pool(node)
+
+
+func _to_pool(node: Node3D) -> void:
 	node.visible = false
 	_enemy_pool.get_or_add(node.get_meta("pool_key"), []).append(node)
+
+
+func _update_dying(delta: float) -> void:
+	var keep: Array[Dictionary] = []
+	for d in _dying:
+		d.t -= delta
+		if d.t <= 0.0:
+			_to_pool(d.node)
+		else:
+			keep.append(d)
+	_dying = keep
+
+
+func _animate_enemy(node: Node3D, e: Units.Enemy) -> void:
+	var player: AnimationPlayer = node.get_meta("anim")
+	if player == null:
+		return
+	if e.frozen_t > 0.0 or e.launched_t > 0.0:
+		player.speed_scale = 0.0
+		return
+	var factor := e.speed / maxf(0.1, float(e.def.speed))
+	if e.chill_t > 0.0:
+		factor *= 1.0 - e.chill_slow
+	if e.in_tar > 0.0:
+		factor *= 1.0 - e.in_tar
+	Assets.play(node, "move", clampf(factor, 0.2, 2.5))
 
 
 func _status_visuals(node: Node3D, e: Units.Enemy) -> void:
@@ -162,7 +204,9 @@ func _hp_bar(node: Node3D, e: Units.Enemy) -> void:
 		node.set_meta("hp_bar", bar)
 		var w := 1.0 + e.size * (3.0 if e.boss else 0.8)
 		bar.scale = Vector3(w, 1.0 if not e.boss else 2.2, 1)
-		bar.position = Vector3(0, e.size * (2.3 if not e.boss else 1.6) + 0.5, 0)
+		var cfg: Dictionary = DataDB.visuals().get("enemies", {}).get(e.type, {})
+		var bar_y: float = float(cfg.bar_y) if cfg.has("bar_y") and node.has_meta("anim") else e.size * (2.3 if not e.boss else 1.6) + 0.5
+		bar.position = Vector3(0, bar_y, 0)
 	bar.visible = show
 	if not show:
 		return
@@ -212,7 +256,7 @@ func _sync_structures(delta: float) -> void:
 			if old:
 				old.queue_free()
 			if st.level > 1:
-				Models.level_pips(node, st.level, float(st.def.get("height", 0.5)))
+				Models.level_pips(node, st.level, float(node.get_meta("height")) if node.has_meta("height") else float(st.def.get("height", 0.5)))
 			node.set_meta("level", st.level)
 		var parts: Dictionary = node.get_meta("parts")
 		if parts.has("head") and node.has_meta("aim"):
