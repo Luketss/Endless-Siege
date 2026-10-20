@@ -1,0 +1,11 @@
+{
+	"first_victory":  { "name_key": "ACH_FIRST_VICTORY",  "rule": { "type": "victory" } },
+	"halfway":        { "name_key": "ACH_HALFWAY",        "rule": { "type": "depth", "min": 3 } },
+	"fortress":       { "name_key": "ACH_FORTRESS",       "rule": { "type": "victory", "core_ratio_min": 0.75 } },
+	"challenger":     { "name_key": "ACH_CHALLENGER",     "rule": { "type": "victory", "modifiers_min": 1 } },
+	"blade_master":   { "name_key": "ACH_BLADE_MASTER",   "rule": { "type": "victory", "hero": "warrior" } },
+	"frostbitten":    { "name_key": "ACH_FROSTBITTEN",    "rule": { "type": "victory", "map": "frost" } },
+	"synergist":      { "name_key": "ACH_SYNERGIST",      "rule": { "type": "synergies", "min": 3 } },
+	"legend":         { "name_key": "ACH_LEGEND",         "rule": { "type": "rarity", "rarity": "legendary" } },
+	"slayer":         { "name_key": "ACH_SLAYER",         "rule": { "type": "stat_total", "stat": "kills", "min": 2000 } }
+}

@@ -72,6 +72,10 @@ static func modifiers() -> Dictionary:
 	return _load("res://data/modifiers.json")
 
 
+static func achievements() -> Dictionary:
+	return _load("res://data/achievements.json")
+
+
 static func heroes() -> Dictionary:
 	return _load("res://data/heroes.json")
 

@@ -280,3 +280,19 @@ func test_frost_map_plays() -> void:
 	check_eq(cleared, 3, "first fight on the frost map is winnable")
 	check(not run.structures.is_empty())
 	check(DataDB.unlocks().frost_map.map == "frost", "unlockable")
+
+
+func test_achievements() -> void:
+	var run := RunState.create(5, "warrior", ["hordes"], [], "frost")
+	check(Achievements.check(run, {}, []).is_empty(), "nothing for an empty defeat")
+	run.victory = true
+	run.finished = true
+	run.core_hp = run.core_max()
+	var got := Achievements.check(run, {"kills": 2500}, [])
+	for id in ["first_victory", "fortress", "challenger", "blade_master", "frostbitten", "slayer"]:
+		check(got.has(id), "earned %s" % id)
+	check(not Achievements.check(run, {"kills": 2500}, got).has("first_victory"), "owned ones are skipped")
+	run.core_hp = run.core_max() * 0.5
+	check(not Achievements.check(run, {}, []).has("fortress"), "fortress needs 75% core")
+	for id in DataDB.achievements():
+		check(DataDB.achievements()[id].has("rule"), "%s has a rule" % id)

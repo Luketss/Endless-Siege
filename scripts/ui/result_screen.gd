@@ -56,12 +56,20 @@ func _ready() -> void:
 		ess.add_theme_color_override("font_color", Color("b48cf0"))
 		v.add_child(ess)
 		v.add_child(UITheme.label(tr("RESULT_ESSENCE_HINT"), "Dim", HORIZONTAL_ALIGNMENT_CENTER))
+		var earned: Array = Profile.get_meta("last_achievements") if Profile.has_meta("last_achievements") else []
+		for id in earned:
+			var a := UITheme.label("★ %s — %s" % [tr("RESULT_ACHIEVEMENT"), tr(DataDB.achievements()[id].name_key)], "", HORIZONTAL_ALIGNMENT_CENTER)
+			a.add_theme_color_override("font_color", UITheme.GOLD)
+			v.add_child(a)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.add_child(row)
 	var again := UITheme.button(tr("RESULT_AGAIN"), true, Vector2(280, 60))
 	again.pressed.connect(func():
-		Profile.new_run(Profile.data.get("modifiers", []))
+		if run:
+			Profile.new_run(Profile.data.get("modifiers", []), run.hero_id, run.map_id)
+		else:
+			Profile.new_run(Profile.data.get("modifiers", []))
 		get_tree().change_scene_to_file("res://scenes/game.tscn"))
 	row.add_child(again)
 	var menu := UITheme.button(tr("RESULT_MENU"), false, Vector2(280, 60))

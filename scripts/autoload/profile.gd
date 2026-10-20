@@ -8,6 +8,7 @@ const DEFAULTS := {
 	"essence": 0,
 	"essence_total": 0,
 	"unlocks": [],
+	"achievements": [],
 	"modifiers": [],
 	"stats": {"runs": 0, "victories": 0, "best_layer": 0, "kills": 0, "waves": 0},
 	"seen_tutorial": false,
@@ -128,6 +129,13 @@ func finish_run(run: RunState) -> int:
 	st.waves = int(st.waves) + int(run.stats.waves)
 	if Settings.get_value("run_log"):
 		RunLog.append(run)
+	var earned := Achievements.check(run, st, data.get("achievements", []))
+	if not data.has("achievements"):
+		data.achievements = []
+	for id in earned:
+		(data.achievements as Array).append(id)
+		SteamService.unlock(id)
+	set_meta("last_achievements", earned)
 	save()
 	clear_run()
 	return gained
