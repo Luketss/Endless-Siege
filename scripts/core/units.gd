@@ -93,6 +93,7 @@ class Projectile:
 	var hits_air: bool = true
 	var hits_ground: bool = true
 	var bounces: int = 0
+	var ignite: float = 0.0  # chance to set the target on fire
 	# Ballistic arc.
 	var start: Vector3 = Vector3.ZERO
 	var t: float = 0.0

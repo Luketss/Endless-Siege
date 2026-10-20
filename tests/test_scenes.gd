@@ -172,6 +172,27 @@ func test_warrior_in_battle() -> void:
 	await _frames(2)
 
 
+func test_mage_in_battle() -> void:
+	var profile: Node = get_tree().root.get_node("Profile")
+	profile.active_run = RunState.create(97, "mage", [], [])
+	var g := await _open("res://scenes/game.tscn")
+	g._enter_node("0-0")
+	await _frames(10)
+	check(g.hero.hero_id == "mage", "mage model")
+	Input.action_press("attack")
+	await _physics(3)
+	Input.action_release("attack")
+	check(g.sim.hero.attack_cd > 0.0, "fire bolt")
+	Input.action_press("ability_1")
+	await _physics(3)
+	check(g.hero._rain_preview.visible, "nova area preview")
+	Input.action_release("ability_1")
+	await _physics(2)
+	check(g.sim.hero.rain_cd > 0.0, "nova cast")
+	g.queue_free()
+	await _frames(2)
+
+
 func _physics(n: int) -> void:
 	for i in n:
 		await get_tree().physics_frame

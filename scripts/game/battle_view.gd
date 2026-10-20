@@ -521,6 +521,14 @@ func handle_event(e: Dictionary) -> void:
 				fx.ring(e.pos, float(e.radius), Color("ffd27a"), 0.5, 0.2)
 				fx.burst(e.pos, float(e.radius) * 0.7, Color(0.7, 0.55, 0.35, 0.45), 0.35)
 				Sfx.play_at("stomp", e.pos, 0.0, 1.3)
+			elif e.name == "nova":
+				fx.ring(e.pos, float(e.radius), Art.PALETTE.ice, 0.5, 0.2)
+				fx.burst(e.pos + Vector3(0, 0.5, 0), float(e.radius) * 0.8, Color(0.6, 0.9, 1.0, 0.45), 0.35)
+				Sfx.play_at("frost", e.pos, 0.0, 0.8)
+				return
+			elif e.name == "chain":
+				Sfx.play_at("hex", e.pos, 0.0, 1.6)
+				return
 			elif e.name == "charge":
 				fx.sparks(e.pos + Vector3(0, 0.6, 0), Color("ffe0a0"), 14, 6.0)
 			else:

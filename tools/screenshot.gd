@@ -96,7 +96,13 @@ func _run() -> void:
 				sim.hero_attack(sim.hero.pos + Vector3(0, 1.4, 0), target - sim.hero.pos)
 		if i == 150:
 			var tgt := sim.map.path.sample(18.0)
-			sim.hero_rain(Vector3(tgt.x, 0, tgt.y))
+			match sim.ability_id(0):
+				"rain":
+					sim.hero_rain(Vector3(tgt.x, 0, tgt.y))
+				"nova":
+					sim.hero_nova(Vector3(tgt.x, 0, tgt.y))
+				"slam":
+					sim.hero_slam()
 	g.view.show_all_ranges = false
 	await _shot("03_battle")
 	# Build mode ghost + range preview.

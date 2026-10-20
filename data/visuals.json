@@ -27,6 +27,12 @@
 			"anims": { "idle": "CharacterArmature|Idle_Weapon", "run": "CharacterArmature|Run", "attack": "CharacterArmature|Bow_Attack_Shoot",
 				"roll": "CharacterArmature|Roll", "death": "CharacterArmature|Death", "cast": "CharacterArmature|Bow_Attack_Draw" }
 		},
+		"mage": {
+			"scene": "res://assets/models/quaternius/rpg/Wizard.fbx", "scale": 0.52, "rot_y": 180,
+			"textures": { "Wizard_Staff": "res://assets/models/quaternius/rpg/Wizard_Staff_Texture.png", "*": "res://assets/models/quaternius/rpg/Wizard_Texture.png" },
+			"anims": { "idle": "CharacterArmature|Idle_Weapon", "run": "CharacterArmature|Run_Weapon", "attack": "CharacterArmature|Staff_Attack",
+				"roll": "CharacterArmature|Roll", "death": "CharacterArmature|Death", "cast": "CharacterArmature|Spell1" }
+		},
 		"warrior": {
 			"scene": "res://assets/models/quaternius/rpg/Warrior.fbx", "scale": 0.52, "rot_y": 180,
 			"textures": { "Warrior_Sword": "res://assets/models/quaternius/rpg/Warrior_Sword_Texture.png", "*": "res://assets/models/quaternius/rpg/Warrior_Texture.png" },

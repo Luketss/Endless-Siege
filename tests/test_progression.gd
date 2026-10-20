@@ -296,3 +296,38 @@ func test_achievements() -> void:
 	check(not Achievements.check(run, {}, []).has("fortress"), "fortress needs 75% core")
 	for id in DataDB.achievements():
 		check(DataDB.achievements()[id].has("rule"), "%s has a rule" % id)
+
+
+func test_mage_abilities() -> void:
+	var sim := make_sim(1000, [], 1, ["banner", "tar"], "mage")
+	var a := sim.spawn_enemy("brute", false, 30.0, 0.0)
+	var b := sim.spawn_enemy("brute", false, 32.0, 0.0)
+	var c := sim.spawn_enemy("brute", false, 34.0, 0.0)
+	sim.step(DT)
+	check(sim.hero_nova(a.pos), "nova")
+	check(a.is_chilled() and a.frozen_t > 0.0 and a.hp < a.max_hp, "nova chills, freezes and damages")
+	check(not sim.hero_nova(a.pos), "nova cooldown")
+	sim.hero.pos = a.pos + Vector3(4, 0, 0)
+	var hp := [a.hp, b.hp, c.hp]
+	check(sim.hero_chain(sim.hero.pos, a.pos), "chain")
+	check(a.hp < hp[0] and b.hp < hp[1] and c.hp < hp[2], "chain jumps between enemies")
+	var arcs := sim.events.filter(func(ev): return ev.type == "arc")
+	check(arcs.size() >= 3, "arc per target (%d)" % arcs.size())
+	check(not sim.hero_chain(sim.hero.pos, a.pos), "chain cooldown")
+
+
+func test_mage_bolts_can_ignite() -> void:
+	var sim := make_sim(1000, [], 1, ["banner", "tar"], "mage")
+	var e := sim.spawn_enemy("brute", false, 30.0, 0.0)
+	sim.step(DT)
+	var burned := false
+	for i in 20:
+		sim.hero.attack_cd = 0.0
+		var from := e.pos + Vector3(0, e.size, 8)
+		sim.hero_attack(from, (e.pos + Vector3(0, e.size, 0)) - from)
+		run(sim, 0.3)
+		if e.burn_t > 0.0:
+			burned = true
+			break
+	check(burned, "fire bolts ignite sometimes")
+	check(sim.stats.damage.has("hero"), "hero damage recorded")

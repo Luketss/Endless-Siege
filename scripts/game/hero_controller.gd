@@ -190,8 +190,9 @@ func _combat_input() -> void:
 			_aiming_ability = ""
 			if not _cast(id):
 				Sfx.play("deny", 0.3)
-	_rain_preview.visible = _aiming_ability == "rain" or _aiming_ability == "slam"
-	_blast_preview.visible = _aiming_ability == "blast" or _aiming_ability == "charge"
+	var kind := _preview_kind(_aiming_ability)
+	_rain_preview.visible = kind in ["ground", "self", "range"]
+	_blast_preview.visible = kind in ["cone", "lane"]
 	if Input.is_action_just_pressed("interact"):
 		sim.hero_interact()
 
@@ -202,6 +203,15 @@ func _cast(id: String) -> bool:
 			return sim.hero_rain(rain_target())
 		"blast":
 			return sim.hero_blast(global_position, rig.forward_flat())
+		"nova":
+			if sim.hero_nova(rain_target()):
+				_cast_t = 0.5
+				return true
+		"chain":
+			var eye := global_position + Vector3(0, 1.45, 0)
+			if sim.hero_chain(global_position, rig.aim_point(sim, eye)):
+				_cast_t = 0.5
+				return true
 		"slam":
 			if sim.hero_slam():
 				_cast_t = 0.5
@@ -238,24 +248,33 @@ func _show_preview() -> void:
 	var h := sim.hero
 	var ready := (h.rain_cd if _aiming_ability == sim.ability_id(0) else h.blast_cd) <= 0.0
 	var col := Color(0.67, 1.0, 0.72) if ready else Color(1.0, 0.45, 0.4)
-	match _aiming_ability:
-		"rain", "slam":
-			var at := rain_target() if _aiming_ability == "rain" else global_position
+	var d: Dictionary = h.def[_aiming_ability]
+	match _preview_kind(_aiming_ability):
+		"ground", "self", "range":
+			var kind := _preview_kind(_aiming_ability)
+			var at := rain_target() if kind == "ground" else global_position
 			_rain_preview.global_position = at + Vector3(0, 0.08, 0)
-			_rain_preview.scale = Vector3.ONE * float(h.def[_aiming_ability].radius)
+			_rain_preview.scale = Vector3.ONE * float(d.range if kind == "range" else d.radius)
 			for c: MeshInstance3D in _rain_preview.get_children():
 				var m := c.material_override as StandardMaterial3D
 				m.albedo_color = Color(col, m.albedo_color.a)
 		_:
 			if _blast_preview.get_meta("for", "") != _aiming_ability:
-				var d: Dictionary = h.def[_aiming_ability]
-				_blast_preview.mesh = cone_mesh(float(d.range), float(d.angle)) if _aiming_ability == "blast" \
+				_blast_preview.mesh = cone_mesh(float(d.range), float(d.angle)) if _preview_kind(_aiming_ability) == "cone" \
 						else lane_mesh(float(d.distance), float(d.width))
 				_blast_preview.set_meta("for", _aiming_ability)
 			_blast_preview.global_position = global_position + Vector3(0, 0.1, 0)
 			_blast_preview.rotation = Vector3(0, rig.yaw, 0)
 			var bm := _blast_preview.material_override as StandardMaterial3D
 			bm.albedo_color = Color(col, bm.albedo_color.a)
+
+
+## How an ability is aimed: ground (crosshair area), self (area around the hero),
+## range (reach circle), cone or lane (in front of the camera).
+func _preview_kind(id: String) -> String:
+	if id == "" or sim == null or not sim.hero.def.has(id):
+		return ""
+	return String(sim.hero.def[id].get("preview", "ground"))
 
 
 ## Flat rectangle for the charge lane (pointing along -Z).

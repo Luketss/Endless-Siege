@@ -4,8 +4,8 @@
 		"abilities": ["rain", "blast"],
 		"attack": { "damage": 13.0, "interval": 0.42, "speed": 55.0, "range": 45.0, "crit": 0.1 },
 		"dodge": { "distance": 6.0, "duration": 0.32, "cooldown": 1.4 },
-		"rain": { "radius": 4.2, "damage": 9.0, "hits": 8, "duration": 2.0, "cooldown": 11.0 },
-		"blast": { "range": 6.5, "angle": 70.0, "damage": 16.0, "push": 5.0, "cooldown": 8.0 },
+		"rain": { "preview": "ground", "radius": 4.2, "damage": 9.0, "hits": 8, "duration": 2.0, "cooldown": 11.0 },
+		"blast": { "preview": "cone", "range": 6.5, "angle": 70.0, "damage": 16.0, "push": 5.0, "cooldown": 8.0 },
 		"xp_curve": [40, 90, 160, 250, 360, 500, 680],
 		"level_bonus": { "damage": 0.1, "hp": 12 }
 	},
@@ -14,9 +14,19 @@
 		"abilities": ["slam", "charge"], "unlock": "warrior",
 		"attack": { "melee": true, "damage": 24.0, "interval": 0.55, "range": 3.2, "angle": 140.0, "crit": 0.1 },
 		"dodge": { "distance": 6.0, "duration": 0.32, "cooldown": 1.4 },
-		"slam": { "radius": 4.5, "damage": 28.0, "stun": 1.4, "cooldown": 10.0 },
-		"charge": { "distance": 8.0, "width": 2.6, "duration": 0.3, "damage": 20.0, "push": 4.0, "cooldown": 8.0 },
+		"slam": { "preview": "self", "radius": 4.5, "damage": 28.0, "stun": 1.4, "cooldown": 10.0 },
+		"charge": { "preview": "lane", "distance": 8.0, "width": 2.6, "duration": 0.3, "damage": 20.0, "push": 4.0, "cooldown": 8.0 },
 		"xp_curve": [40, 90, 160, 250, 360, 500, 680],
 		"level_bonus": { "damage": 0.1, "hp": 18 }
+	},
+	"mage": {
+		"name_key": "H_MAGE", "desc_key": "H_MAGE_DESC", "hp": 95, "speed": 7.0, "regen": 2.0,
+		"abilities": ["nova", "chain"], "unlock": "mage",
+		"attack": { "damage": 11.0, "interval": 0.5, "speed": 38.0, "range": 40.0, "crit": 0.08, "dtype": "fire", "ignite": 0.35, "style": "fire_bolt" },
+		"dodge": { "distance": 6.0, "duration": 0.32, "cooldown": 1.4 },
+		"nova": { "preview": "ground", "radius": 4.0, "damage": 16.0, "slow": 0.5, "chill": 3.0, "freeze": 1.0, "cooldown": 10.0 },
+		"chain": { "preview": "range", "range": 16.0, "bounce_range": 6.5, "targets": 5, "damage": 22.0, "falloff": 0.85, "cooldown": 7.0 },
+		"xp_curve": [40, 90, 160, 250, 360, 500, 680],
+		"level_bonus": { "damage": 0.12, "hp": 10 }
 	}
 }

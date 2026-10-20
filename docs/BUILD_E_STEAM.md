@@ -9,7 +9,7 @@
 | CI exportando os dois e publicando artefatos | ✅ `.github/workflows/ci.yml` |
 | Ícone embutido no .exe | ⚠️ exige `rcedit` configurado no editor (em Linux a exportação avisa e segue sem ícone) |
 | Assinatura de código Windows | ⏳ pendente (certificado necessário) |
-| Integração Steamworks | ✅ ponte `SteamService` com 9 conquistas, que só funciona com o GodotSteam instalado. ⏳ Falta adicionar o plugin, configurar o App ID e cadastrar as conquistas no Steamworks |
+| Integração Steamworks | ✅ ponte `SteamService` com 10 conquistas, que só funciona com o GodotSteam instalado. ⏳ Falta adicionar o plugin, configurar o App ID e cadastrar as conquistas no Steamworks |
 | Scripts de upload SteamPipe | ✅ modelos em `steam/scripts/` (faltam os IDs de app e depots) |
 
 ## Gerar os builds
@@ -41,7 +41,7 @@ Para ativar:
 
 1. Adicione o [GodotSteam GDExtension](https://godotsteam.com/) para 4.3 em `addons/godotsteam/`.
 2. Crie `steam_appid.txt` com o App ID. Ele serve só para desenvolvimento e não vai no depot.
-3. No Steamworks, crie as conquistas com os **mesmos nomes de API** das chaves do JSON: `first_victory`, `halfway`, `fortress`, `challenger`, `blade_master`, `frostbitten`, `synergist`, `legend` e `slayer`. Os textos em PT/EN estão nas chaves `ACH_*` de `tools/translations_source.py`.
+3. No Steamworks, crie as conquistas com os **mesmos nomes de API** das chaves do JSON: `first_victory`, `halfway`, `fortress`, `challenger`, `blade_master`, `arcanist`, `frostbitten`, `synergist`, `legend` e `slayer`. Os textos em PT/EN estão nas chaves `ACH_*` de `tools/translations_source.py`.
 4. Configure o Auto-Cloud para `user://profile.json` e `user://run.json`.
 5. Opcional: chame `SteamService.presence("steam_display", "#InBattle")` para mostrar a rich presence aos amigos (é preciso definir os tokens no Steamworks).
 

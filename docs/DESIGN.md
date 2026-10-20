@@ -78,6 +78,19 @@ Inimigos que encostam nela atacam com uma preparação de 0,4 s (animação de g
 
 O golpe básico não alcança voadores, então a defesa antiaérea depende das torres e do Impacto.
 
+## Heroína: Maga (desbloqueio no Santuário, 35 de essência)
+
+95 de vida, 7 m/s. É frágil, mas aproveita as sinergias elementais das torres.
+
+| Ação | Efeito |
+|---|---|
+| LMB | Projétil de fogo de 11 de dano a cada 0,5 s, com 35% de chance de incendiar |
+| Q — Nova Gélida | 16 de dano de gelo num raio de 4 m na mira; resfria (50% por 3 s) e congela por 1 s (exceto o chefe), ativando Estilhaçar e Congelamento Profundo; recarga de 10 s |
+| E — Corrente de Raios | Atinge o inimigo mais próximo da mira (até 16 m) e salta para até 5 alvos (6,5 m entre eles), perdendo 15% de dano a cada salto; o raio já causa ×1,5 em resfriados; recarga de 7 s |
+| Espaço — Esquiva | Igual à dos outros heróis |
+
+A combinação natural é Nova e logo depois Corrente: os alvos resfriados recebem o bônus de raio.
+
 ## Melhorias (28)
 
 | Raridade | Melhorias |
