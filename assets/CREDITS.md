@@ -1,6 +1,6 @@
-# Créditos de arte
+# Créditos de arte e áudio
 
-Todos os modelos 3D importados são **CC0 1.0 (domínio público)**: uso comercial livre, sem exigência de atribuição. Mesmo assim, o jogo credita os autores. Cada pasta mantém o arquivo de licença original do pacote.
+Todos os modelos 3D e sons importados são **CC0 1.0 (domínio público)**: uso comercial livre, sem exigência de atribuição. Mesmo assim, o jogo credita os autores. Cada pasta mantém o arquivo de licença original do pacote.
 
 | Pasta | Pacote | Autor | Origem | Licença |
 |---|---|---|---|---|
@@ -36,3 +36,17 @@ Continuam procedurais (feitos por código): armadilhas, núcleo de cristal, port
 ## Como trocar ou adicionar arte
 
 As referências ficam em `data/visuals.json` (caminho, escala, rotação, altura da barra de vida e nomes das animações). Se um arquivo faltar, o jogo usa o modelo procedural correspondente. `tools/inspect_models.gd` lista tamanhos e animações dos modelos importados, e `tools/model_lineup.gd` renderiza todos lado a lado com uma régua de 1,8 m para calibrar as escalas.
+
+## Áudio
+
+Pasta `audio/kenney/`, com os arquivos `License_*.txt` originais. Todos são CC0, da Kenney (https://kenney.nl).
+
+| Pacote | Usado em |
+|---|---|
+| [Interface Sounds](https://kenney.nl/assets/interface-sounds) | cliques, voltar, erro, melhoria, sinergia, gelo |
+| [Impact Sounds](https://kenney.nl/assets/impact-sounds) | construção, golpes, críticos, dano na heroína, mortes, sino do núcleo |
+| [RPG Audio](https://kenney.nl/assets/rpg-audio) | moedas, espinhos, mola, esquiva |
+| [Sci-fi Sounds](https://kenney.nl/assets/sci-fi-sounds) | disparo do canhão, explosões, pisão do chefe |
+| [Digital Audio](https://kenney.nl/assets/digital-audio) | maldição do feiticeiro, subida de nível |
+
+O arco, as torres de flecha e as vinhetas musicais (início e fim de onda, vitória, derrota) continuam sintetizados em `scripts/autoload/sfx.gd`, assim como a música.

@@ -67,3 +67,12 @@ func test_licenses_present() -> void:
 			"res://assets/models/quaternius/monsters", "res://assets/models/quaternius/rpg"]:
 		check(FileAccess.file_exists(dir.path_join("License.txt")), "license in %s" % dir)
 	check(FileAccess.file_exists("res://assets/CREDITS.md"), "credits file")
+
+
+func test_recorded_sounds_load() -> void:
+	var sfx: Node = Engine.get_main_loop().root.get_node("Sfx")
+	for name in sfx.RECORDED:
+		var spec: Array = sfx.RECORDED[name]
+		for i in range(1, spec.size()):
+			var path: String = sfx.DIR + spec[i] + ".ogg"
+			check(ResourceLoader.exists(path) and load(path) is AudioStream, "%s: %s.ogg" % [name, spec[i]])

@@ -1,8 +1,27 @@
 extends Node
-## Sound effects synthesized at startup (placeholder until recorded audio exists).
-## 2D for UI, 3D (positional) for battlefield sounds. Throttled so swarms stay readable.
+## Sound effects: recorded CC0 samples (Kenney audio packs, assets/audio/kenney) with
+## synthesized fallbacks for the rest (bow, musical stings). A sound can have several
+## variants, picked at random. 2D for UI, 3D (positional) for the battlefield;
+## throttled so swarms stay readable.
 
 const RATE := 22050
+const DIR := "res://assets/audio/kenney/"
+## name -> [volume dB, files...]
+const RECORDED := {
+	"ui": [-6.0, "click_001"], "ui_back": [-6.0, "back_001"], "deny": [-4.0, "error_004"],
+	"build": [-2.0, "impactWood_heavy_000", "impactWood_heavy_001"],
+	"sell": [-2.0, "handleCoins"], "gold": [-2.0, "handleCoins2"],
+	"upgrade": [-4.0, "confirmation_002"], "synergy": [-4.0, "confirmation_004"],
+	"frost": [-8.0, "glass_001", "glass_002"],
+	"hit": [-10.0, "impactPunch_medium_000", "impactPunch_medium_001", "impactPunch_medium_002"],
+	"crit": [-4.0, "impactPunch_heavy_000"], "hurt": [-2.0, "impactPunch_heavy_001"],
+	"death": [-8.0, "impactSoft_heavy_000", "impactSoft_heavy_001"],
+	"cannon": [-6.0, "lowFrequency_explosion_000"], "stomp": [0.0, "lowFrequency_explosion_001"],
+	"explosion": [-6.0, "explosionCrunch_000", "explosionCrunch_001", "explosionCrunch_002"],
+	"spikes": [-6.0, "knifeSlice", "knifeSlice2"], "spring": [-4.0, "creak1"],
+	"leak": [-2.0, "impactBell_heavy_000"], "dodge": [-6.0, "cloth1", "cloth2"],
+	"hex": [-6.0, "phaserDown1"], "level_up": [-6.0, "powerUp2"],
+}
 
 var _sounds := {}
 var _players2d: Array[AudioStreamPlayer] = []
@@ -10,6 +29,7 @@ var _players3d: Array[AudioStreamPlayer3D] = []
 var _i2 := 0
 var _i3 := 0
 var _last := {}
+var _db := {}
 
 
 func _ready() -> void:
@@ -54,6 +74,25 @@ func _ready() -> void:
 	_sounds["dodge"] = _tone([[500.0, 300.0, 0.1]], 0.2, "noise")
 	_sounds["victory"] = _tone([[523.0, 523.0, 0.15], [659.0, 659.0, 0.15], [784.0, 784.0, 0.15], [1046.0, 1046.0, 0.5]], 0.4, "triangle")
 	_sounds["defeat"] = _tone([[392.0, 392.0, 0.25], [330.0, 330.0, 0.25], [262.0, 200.0, 0.7]], 0.4, "triangle")
+	_load_recorded()
+
+
+func _load_recorded() -> void:
+	for name in RECORDED:
+		var spec: Array = RECORDED[name]
+		var list: Array = []
+		for i in range(1, spec.size()):
+			var path: String = DIR + spec[i] + ".ogg"
+			if ResourceLoader.exists(path):
+				list.append(load(path))
+		if not list.is_empty():
+			_sounds[name] = list
+			_db[name] = float(spec[0])
+
+
+func _pick(name: String) -> AudioStream:
+	var s = _sounds[name]
+	return s[randi() % s.size()] if s is Array else s
 
 
 func play(name: String, min_gap: float = 0.0, pitch: float = 1.0) -> void:
@@ -61,7 +100,8 @@ func play(name: String, min_gap: float = 0.0, pitch: float = 1.0) -> void:
 		return
 	var p := _players2d[_i2]
 	_i2 = (_i2 + 1) % _players2d.size()
-	p.stream = _sounds[name]
+	p.stream = _pick(name)
+	p.volume_db = float(_db.get(name, 0.0))
 	p.pitch_scale = pitch
 	p.play()
 
@@ -71,7 +111,8 @@ func play_at(name: String, pos: Vector3, min_gap: float = 0.0, pitch: float = 1.
 		return
 	var p := _players3d[_i3]
 	_i3 = (_i3 + 1) % _players3d.size()
-	p.stream = _sounds[name]
+	p.stream = _pick(name)
+	p.volume_db = float(_db.get(name, 0.0))
 	p.global_position = pos
 	p.pitch_scale = pitch * randf_range(0.94, 1.06)
 	p.play()
